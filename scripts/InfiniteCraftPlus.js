@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinite Craft Plus
 // @namespace    Bane
-// @version      0.2.1
+// @version      0.2.2
 // @description  Infinite Craft is fun, but it could be better.
 // @author       Bane
 // @match        https://neal.fun/infinite-craft/
@@ -47,8 +47,8 @@ function createSearchBar() {
 
     let sidebar = document.querySelector('.sidebar');
 
-    let searchBar = createElementAndAppend({ type: 'div', className: 'bane-search-bar' }, sidebar, true);
-    let input = createElementAndAppend({ type: 'input', className: 'bane-search-input' }, searchBar);
+    let searchBar = createElementAndAppend(sidebar, { className: 'bane-search-bar' }, true);
+    let input = createElementAndAppend(searchBar, { type: 'input', className: 'bane-search-input' });
 
     // add event listener to input element
     input.addEventListener('input', function (event) {
@@ -165,7 +165,7 @@ function updateItemCount() {
         let itemCount = sidebar.querySelectorAll('.item').length;
         let sidebarControls = sidebar.querySelector('.sidebar-controls');
 
-        count = createElementAndAppend(sidebarControls, 'div', `Items Found: ${itemCount}`, 'bane-item-count', 'bane-item-count', true);
+        count = createElementAndAppend(sidebarControls, { text: `Items Found: ${itemCount}`, className: 'bane-item-count', id: 'bane-item-count' }, true);
 
         // add some css to the head
         addCSSToHead(`
@@ -176,7 +176,6 @@ function updateItemCount() {
             justify-content: space-between !important;
         }
         `, 'bane-item-count-css');
-
     }
 
     // trigger search's input event to update the found items
@@ -219,8 +218,9 @@ function addDarkModeButton() {
     if (localStorage.getItem('darkMode') === 'true')
         html.classList.add('invert');
 
-    let darkModeButton = createElementAndAppend(controls, 'img', '', 'dark-mode-button', 'dark-mode-button', true);
-    darkModeButton.src = 'https://www.svgrepo.com/show/309493/dark-theme.svg';
+    let darkModeButton = createImgAndAppend(controls, { src: 'https://www.svgrepo.com/show/309493/dark-theme.svg', alt: 'Dark Mode', className: 'dark-mode-button' }, true);
+
+    console.log(darkModeButton);
 
     darkModeButton.addEventListener('click', toggleDarkMode);
 
@@ -276,9 +276,10 @@ function createElement(options = {}) {
     } = options
 
     let element = document.createElement(type);
-    element.textContent = text;
-    element.className = className;
-    element.id = id;
+    if (text) element.textContent = text;
+    if (className) element.className = className;
+    if (id) element.id = id;
+
     return element;
 }
 
@@ -294,15 +295,34 @@ function createElement(options = {}) {
  * @returns {HTMLElement} the new element 
  */
 function createElementAndAppend(parent, options = {}, asFirst = false) {
+
+    let element = createElement(options);
+    if (asFirst)
+        parent.insertBefore(element, parent.firstChild);
+    else
+        parent.appendChild(element);
+
+    return element;
+}
+
+function createImgAndAppend(parent, options = {}, asFirst = false) {
     const {
-        type = 'div',
-        text = '',
+        src = '',
+        alt = '',
         className = '',
         id = ''
     } = options
 
-    let element = createElement(type, text, className, id);
-    asFirst ? parent.prepend(element) : parent.appendChild(element);
+    let element = document.createElement('img');
+    element.src = src;
+    element.alt = alt;
+    element.className = className;
+    element.id = id;
+
+    if (asFirst)
+        parent.insertBefore(element, parent.firstChild);
+    else
+        parent.appendChild(element);
 
     return element;
 }
@@ -316,8 +336,7 @@ function addCSSToHead(css, id) {
     // if the css exists in the head already, don't add it again
     if (document.getElementById(id)) return;
 
-    let style = createElement('style', css);
-    style.id = id;
+    let style = createElement({ type: 'style', text: css, id: id });
     document.head.appendChild(style);
 }
 //#endregion
