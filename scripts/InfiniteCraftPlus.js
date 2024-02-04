@@ -31,6 +31,8 @@ window.onload = function () {
 
     createSearchBar();
     addDarkModeButton();
+
+    addCheatMode();
 };
 
 var itemCount = 0;
@@ -126,15 +128,24 @@ function createSearchBar() {
 
 /** Returns an array of items that contain the given term */
 function findItems(items, term) {
-    return items.filter(item => item.textContent.toLowerCase().includes(term));
+    return Array.from(items).filter(item => item.textContent.toLowerCase().includes(term));
 }
 
 /** Returns a random number of items from the given array */
-function randomItems(items, count = 10) {
+function randomItems(items, count = 10, canRepeat = false) {
     if (count > items.length)
         return items;
 
-    const randomItems = new Set();
+    if (canRepeat) {
+        let randomItems = [];
+        for (let i = 0; i < count; i++) {
+            const random = items[Math.floor(Math.random() * items.length)];
+            randomItems.push(random);
+        }
+        return randomItems;
+    }
+
+    var randomItems = new Set();
     while (randomItems.size < count) {
         const random = items[Math.floor(Math.random() * items.length)];
         randomItems.add(random);
@@ -159,13 +170,17 @@ function getItemCount() {
 function updateItemCount() {
     // if item count already exists, don't create another one, just update the count
     let count = document.getElementById('bane-item-count');
+    let countMobile = document.getElementById('bane-item-count-mobile');
 
-    if (!count) {
+    if (!count && !countMobile) {
         let sidebar = document.querySelector('.sidebar');
         let itemCount = sidebar.querySelectorAll('.item').length;
         let sidebarControls = sidebar.querySelector('.sidebar-controls');
 
         count = createElementAndAppend(sidebarControls, { text: `Items Found: ${itemCount}`, className: 'bane-item-count', id: 'bane-item-count' }, true);
+
+        let container = document.querySelector('.container');
+        countMobile = createElementAndAppend(container, { text: `Items Found: ${itemCount}`, className: 'bane-item-count-mobile', id: 'bane-item-count-mobile' }, true);
 
         // add some css to the head
         addCSSToHead(`
@@ -175,12 +190,18 @@ function updateItemCount() {
             padding: 0 10px;
             justify-content: space-between !important;
         }
+
+        .bane-item-count-mobile
+        {
+            display: none;
+        }
         `, 'bane-item-count-css');
     }
 
     // trigger search's input event to update the found items
     let input = document.querySelector('.bane-search-input');
-    count.textContent = `Items: ${itemCount}`;
+    count.textContent = `Items Found: ${itemCount}`;
+    countMobile.textContent = `Items Found: ${itemCount}`;
 
     if (!input) return;
     input.dispatchEvent(new Event('input'));
@@ -220,8 +241,6 @@ function addDarkModeButton() {
 
     let darkModeButton = createImgAndAppend(controls, { src: 'https://www.svgrepo.com/show/309493/dark-theme.svg', alt: 'Dark Mode', className: 'dark-mode-button' }, true);
 
-    console.log(darkModeButton);
-
     darkModeButton.addEventListener('click', toggleDarkMode);
 
     addCSSToHead(`
@@ -253,7 +272,199 @@ function addBaseCSS() {
         opacity: .2;
     }
     `, 'bane-base-css');
+
+    addCSSToHead(`
+    @media screen and (max-width: 800px)
+    {
+        html
+        {
+            overflow: hidden;
+        }
+        
+        .mobile-instruction
+        {
+            position: absolute;
+            left: 50%;
+            bottom: 50px;
+            transform: translateX(-50%);
+        }
+        
+        .container
+        {
+            height: calc(100vh - 130px) !important;
+        }
+        
+        .mobile-items
+        {
+            height: 100%;
+            overflow-y: scroll;
+            margin-top: 70px !important;
+            align-content: flex-start;
+        }
+        
+        .bane-item-count-mobile
+        {
+            display: block !important;
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+        }
+    }
+    `, 'bane-mobile-css');
 }
+//#endregion
+
+//#region CHEAT MODE?
+
+var triedCombos = [];
+var results = [];
+
+// load triedCombos and results from local storage
+loadFromStorage();
+
+var lastCombo = '';
+
+function addCheatMode() {
+    // when ctrl + space is pressed
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey && event.code === 'Space') {
+            // if the screen is not 800px wide or less, don't do anything
+            // if (window.innerWidth > 800) return;
+
+            let itemList = document.querySelector('.mobile-items');
+            let itemContainers = itemList.querySelectorAll('.mobile-item');
+            // get the .item elements from the .mobile-item elements
+            let items = Array.from(itemContainers).map(item => item.querySelector('.item'));
+
+            // if any .item has the class .item-selected-mobile, don't do anything
+            if (items.some(item => item.classList.contains('item-selected-mobile'))) return;
+
+            // get two random items and add them to the triedCombos array
+            // if the combo has already been tried, try again
+            let cheatyItems = randomItems(items, 2, canRepeat = true);
+            let combo = cheatyOrder(cheatyItems);
+
+            while (triedCombos.includes(combo)) {
+                cheatyItems = randomItems(items, 2, canRepeat = true);
+                combo = cheatyOrder(cheatyItems);
+            }
+
+            triedCombos.push(combo);
+            lastCombo = combo;
+
+            // console.log(triedCombos);
+
+            function cheatyOrder(items) {
+                let order = [];
+                 items.forEach(item => order.push(item.textContent.split('\n')[1].trim()));
+                // sort the order array alphabetically
+                order.sort();
+                return order.join(' + ');
+            }
+
+            // simulate a click on the two random items as if the user clicked them
+            for (let i = 0; i < cheatyItems.length; i++) {
+                // fire a click event on the .item inside the .mobile-item
+                let event = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+
+                cheatyItems[i].dispatchEvent(event);
+            }
+
+            saveResults();
+
+            // find the .item-crafted-mobile element and add it to the results array along with the combo like
+            // { combo: "Rainbow + Unicorn", result: "🦄" }
+            // let craftedItem = document.querySelector('.item-crafted-mobile');
+            // if (craftedItem)
+            //     logCraftedItem(craftedItem);
+        }
+    });
+
+    // when .reset is clicked
+    document.querySelector('.reset').addEventListener('click', function () {
+        clearStorage();
+    });
+
+    // if itemCount = 4, then saving didn't work on the site, so clear the local storage
+    getItemCount();
+    if (itemCount === 4)
+        clearStorage();
+
+    function logCraftedItem(craftedItem) {
+        let result = craftedItem.textContent.split('\n')[1].trim();
+        let resultCombo = { combo: lastCombo, result: result };
+        if (!results.some(r => r.combo === resultCombo.combo)) {
+            results.push(resultCombo);
+            console.log(results);
+
+            console.log(`Combo: ${resultCombo.combo} -> ${resultCombo.result}`);
+        }
+
+        saveResults();
+    }
+
+    function saveResults() {
+        localStorage.setItem('triedCombos', JSON.stringify(triedCombos));
+        localStorage.setItem('results', JSON.stringify(results));
+    }
+
+    const mobileItems = document.querySelector('.mobile-items');
+
+    // when the .mobile-item list gets a new item
+    mobileItems.addEventListener('DOMNodeInserted', function (event) {
+        let craftedItem = event.target.querySelector('.item-crafted-mobile');
+        if (craftedItem)
+            logCraftedItem(craftedItem);
+    });
+
+    // when the .mobile-item list has any .item inside it whose class changes
+    // the subtree mobification check needs to check children of children
+    mobileItems.addEventListener('DOMSubtreeModified', function (event) {
+        // if there is a .item-crafted-mobile element, add it to the results array along with the combo if it's not already there
+        let craftedItem = event.target.querySelector('.item-crafted-mobile');
+        if (craftedItem)
+            logCraftedItem(craftedItem);
+    });
+
+    mobileItems.addEventListener('DOMCharacterDataModified', function (event) {
+        // if there is a .item-crafted-mobile element, add it to the results array along with the combo if it's not already there
+        let craftedItem = event.target.querySelector('.item-crafted-mobile');
+        if (craftedItem)
+            logCraftedItem(craftedItem);
+    });
+
+    mobileItems.addEventListener('DOMAttrModified', function (event) {
+        // if there is a .item-crafted-mobile element, add it to the results array along with the combo if it's not already there
+        let craftedItem = event.target.querySelector('.item-crafted-mobile');
+        if (craftedItem)
+            logCraftedItem(craftedItem);
+    });
+}
+
+function saveToStorage(triedCombos, results) {
+    localStorage.setItem('triedCombos', JSON.stringify(triedCombos));
+    localStorage.setItem('results', JSON.stringify(results));
+}
+function loadFromStorage() {
+    console.log('Loading combos and results from local storage');
+    if (localStorage.getItem('triedCombos'))
+        triedCombos = JSON.parse(localStorage.getItem('triedCombos'));
+    if (localStorage.getItem('results'))
+        results = JSON.parse(localStorage.getItem('results'));
+}
+function clearStorage() {
+    console.log('Clearing combos and results from local storage');
+    triedCombos = [];
+    results = [];
+    localStorage.removeItem('triedCombos');
+    localStorage.removeItem('results');
+}
+
 //#endregion
 
 //#region Helper functions
