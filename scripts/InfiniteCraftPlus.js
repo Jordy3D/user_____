@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinite Craft Plus
 // @namespace    Bane
-// @version      0.2.2
+// @version      0.3.0
 // @description  Infinite Craft is fun, but it could be better.
 // @author       Bane
 // @match        https://neal.fun/infinite-craft/
@@ -20,6 +20,13 @@
 //  - Fixed a few CSS issues
 // 0.2.1
 //  - Code cleanup
+// 0.2.2
+//  - Added cheat mode
+//  - Added multi-search (search for multiple items at once)
+// 0.3.0
+//  - Remove official search bar
+//  - Add quick-clear button to search bar
+//  - Improve multi-search
 // ==/Change Log==
 
 
@@ -41,6 +48,12 @@ setInterval(getItemCount, 200);
 
 
 //#region SEARCH BAR
+// ███████╗███████╗ █████╗ ██████╗  ██████╗██╗  ██╗
+// ██╔════╝██╔════╝██╔══██╗██╔══██╗██╔════╝██║  ██║
+// ███████╗█████╗  ███████║██████╔╝██║     ███████║
+// ╚════██║██╔══╝  ██╔══██║██╔══██╗██║     ██╔══██║
+// ███████║███████╗██║  ██║██║  ██║╚██████╗██║  ██║
+// ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 
 /** Creates a search bar in the sidebar */
 function createSearchBar() {
@@ -51,6 +64,7 @@ function createSearchBar() {
 
     let searchBar = createElementAndAppend(sidebar, { className: 'bane-search-bar' }, true);
     let input = createElementAndAppend(searchBar, { type: 'input', className: 'bane-search-input' });
+    let clearButton = createElementAndAppend(searchBar, { type: 'button', text: '🗙', className: 'clear-search' });
 
     // add event listener to input element
     input.addEventListener('input', function (event) {
@@ -65,27 +79,61 @@ function createSearchBar() {
         }
         sidebar.classList.add('searching');
 
-        let search = event.target.value.toLowerCase();
+        let searchInput = event.target.value.toLowerCase();
+
+        let searchTerms = searchInput.split(';');
+        searchTerms = searchTerms.map(term => term.trim());
 
         let randomPattern = /^r:(\d+)?$/;
-        let randomMatch = search.match(randomPattern);
+        let randomMatch = searchTerms.find(term => randomPattern.test(term));
+
         if (randomMatch) {
-            let randomCount = randomMatch[1] ? parseInt(randomMatch[1]) : items.length;
+            let randomCount = randomMatch.replace('r:', '');
+            if (randomCount === '' && searchTerms.length === 1)
+                randomCount = items.length;
+            else 
+                randomCount = parseInt(randomCount);
 
             let randomResults = randomItems(items, randomCount);
             randomResults.forEach(item => item.classList.add('found'));
-            return;
         }
 
-        let foundResults = findItems(items, search);
+        searchTerms = searchTerms.map(term => term.trim());
+        
+        let foundResults = findItems(items, searchTerms);
         foundResults.forEach(item => item.classList.add('found'));
     });
 
+    // add event listener to clear button
+    clearButton.addEventListener('click', function () {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+    });
+
     addCSSToHead(`
-    .bane-search-input {
+    .bane-search-bar
+    {
         width: 100%;
-        padding: 10px;
         font-size: 16px;
+        height: 40px;
+        
+        display: flex;
+        
+        border-bottom: 1px solid #ccc;
+    }
+
+    .bane-search-input {
+        padding: 10px;
+        width: 100%;
+        
+        border: none;
+        
+        outline: none !important;
+    }
+    .bane-search-input:focus-visible
+    {
+        background: #ccc;
+        border-right: 1px solid white;
     }
 
     .sidebar.searching .item {
@@ -94,6 +142,24 @@ function createSearchBar() {
 
     .sidebar.searching .item.found {
         display: block;
+    }
+
+    .clear-search
+    {
+        width: 40px;
+        border: none;
+        
+        background: #0000;
+        color: #909090;
+        
+        border-left: 1px solid #ccc;
+        
+        cursor: pointer;
+    }
+
+    .clear-search:hover
+    {
+        background: #ccc;
     }
 
     .sidebar
@@ -127,8 +193,17 @@ function createSearchBar() {
 }
 
 /** Returns an array of items that contain the given term */
-function findItems(items, term) {
-    return Array.from(items).filter(item => item.textContent.toLowerCase().includes(term));
+function findItems(items, terms) {
+    // add found class to items that contain the search term and are not already found
+    let foundItems = [];
+    items.forEach(item => {
+        let text = item.textContent.toLowerCase();
+        // if ANY of the search terms are found in the text, add it
+        let found = terms.some(term => text.includes(term));
+
+        if (found) foundItems.push(item);
+    });
+    return foundItems;
 }
 
 /** Returns a random number of items from the given array */
@@ -155,6 +230,12 @@ function randomItems(items, count = 10, canRepeat = false) {
 //#endregion
 
 //#region ITEM COUNT
+//  ██████╗ ██████╗ ██╗   ██╗███╗   ██╗████████╗
+// ██╔════╝██╔═══██╗██║   ██║████╗  ██║╚══██╔══╝
+// ██║     ██║   ██║██║   ██║██╔██╗ ██║   ██║   
+// ██║     ██║   ██║██║   ██║██║╚██╗██║   ██║   
+// ╚██████╗╚██████╔╝╚██████╔╝██║ ╚████║   ██║   
+//  ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   
 
 /** Gets the number of items discovered. */
 function getItemCount() {
@@ -177,17 +258,17 @@ function updateItemCount() {
         let itemCount = sidebar.querySelectorAll('.item').length;
         let sidebarControls = sidebar.querySelector('.sidebar-controls');
 
-        count = createElementAndAppend(sidebarControls, { text: `Items Found: ${itemCount}`, className: 'bane-item-count', id: 'bane-item-count' }, true);
+        count = createElementAndAppend(sidebarControls, { text: `Items Discovered: ${itemCount}`, className: 'bane-item-count', id: 'bane-item-count' }, true);
 
         let container = document.querySelector('.container');
-        countMobile = createElementAndAppend(container, { text: `Items Found: ${itemCount}`, className: 'bane-item-count-mobile', id: 'bane-item-count-mobile' }, true);
+        countMobile = createElementAndAppend(container, { text: `Items Discovered: ${itemCount}`, className: 'bane-item-count-mobile', id: 'bane-item-count-mobile' }, true);
 
         // add some css to the head
         addCSSToHead(`
         .sidebar-controls
         {
             margin-top: auto;
-            padding: 0 10px;
+            padding: 10px;
             justify-content: space-between !important;
         }
 
@@ -200,8 +281,8 @@ function updateItemCount() {
 
     // trigger search's input event to update the found items
     let input = document.querySelector('.bane-search-input');
-    count.textContent = `Items Found: ${itemCount}`;
-    countMobile.textContent = `Items Found: ${itemCount}`;
+    count.textContent = `Items Discovered: ${itemCount}`;
+    countMobile.textContent = `Items Discovered: ${itemCount}`;
 
     if (!input) return;
     input.dispatchEvent(new Event('input'));
@@ -209,6 +290,12 @@ function updateItemCount() {
 //#endregion
 
 //#region DARK MODE
+// ██████╗  █████╗ ██████╗ ██╗  ██╗
+// ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝
+// ██║  ██║███████║██████╔╝█████╔╝ 
+// ██║  ██║██╔══██║██╔══██╗██╔═██╗ 
+// ██████╔╝██║  ██║██║  ██║██║  ██╗
+// ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
 /** Toggles dark mode on the page */
 function toggleDarkMode() {
@@ -253,9 +340,16 @@ function addDarkModeButton() {
 //#endregion
 
 //#region BASE CSS
+// ██████╗  █████╗ ███████╗███████╗
+// ██╔══██╗██╔══██╗██╔════╝██╔════╝
+// ██████╔╝███████║███████╗█████╗  
+// ██╔══██╗██╔══██║╚════██║██╔══╝  
+// ██████╔╝██║  ██║███████║███████╗
+// ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝
 
 /** Adds some preliminary CSS to the page */
 function addBaseCSS() {
+    // base CSS
     addCSSToHead(`
     html.invert { filter: invert(1); }
     html.invert .item span { filter: invert(1) }
@@ -273,6 +367,7 @@ function addBaseCSS() {
     }
     `, 'bane-base-css');
 
+    // mobile CSS
     addCSSToHead(`
     @media screen and (max-width: 800px)
     {
@@ -312,10 +407,23 @@ function addBaseCSS() {
         }
     }
     `, 'bane-mobile-css');
+
+    // tweak CSS
+    addCSSToHead(`
+    .sidebar-input {
+        display: none;
+    }
+    `, 'bane-tweak-css');
 }
 //#endregion
 
 //#region CHEAT MODE?
+//  ██████╗██╗  ██╗███████╗ █████╗ ████████╗
+// ██╔════╝██║  ██║██╔════╝██╔══██╗╚══██╔══╝
+// ██║     ███████║█████╗  ███████║   ██║   
+// ██║     ██╔══██║██╔══╝  ██╔══██║   ██║   
+// ╚██████╗██║  ██║███████╗██║  ██║   ██║   
+//  ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝   ╚═╝   
 
 var triedCombos = [];
 var results = [];
