@@ -18,7 +18,7 @@ Install a userscript manager for your browser:
 | Site | Script Install | Description |
 | :---: | :---: | :---: |
 | [Arxiv](https://arxiv.org/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/ArxivWebShortcut.user.js) | Adds a shortcut to the web version of the paper. |
-| [Audible](https://www.audible.com/) | [Install](htps://github.com/Jordy3D/user_____/raw/main/scripts/audiblebonus.user.js) | Adds a few buttons that make accessing/copying content easier. |
+| [Audible](https://www.audible.com/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/audiblebonus.user.js) | Adds a few buttons that make accessing/copying content easier. |
 | [AniList](https://anilist.co/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/BanesAnilistChanges.user.js) | A couple of minor things that make my life easier.<br>May cause slowdown on some pages... |
 | [Discord](https://discord.com/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/DiscordChan.user.js) | Makes messages starting with > look like a 4chan post. |
 | [Infinite Craft](https://neal.fun/infinite-craft/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/InfiniteCraftPlus.user.js) | Adds a dark theme, search functionality, and an item counter. |
