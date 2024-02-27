@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinite Craft Plus
 // @namespace    Bane
-// @version      0.3.0
+// @version      0.3.1
 // @description  Infinite Craft is fun, but it could be better.
 // @author       Bane
 // @match        https://neal.fun/infinite-craft/
@@ -27,6 +27,9 @@
 //  - Remove official search bar
 //  - Add quick-clear button to search bar
 //  - Improve multi-search
+// 0.3.1
+//  - Patch for the site's update
+//  - Remove official dark mode button
 // ==/Change Log==
 
 
@@ -91,7 +94,7 @@ function createSearchBar() {
             let randomCount = randomMatch.replace('r:', '');
             if (randomCount === '' && searchTerms.length === 1)
                 randomCount = items.length;
-            else 
+            else
                 randomCount = parseInt(randomCount);
 
             let randomResults = randomItems(items, randomCount);
@@ -99,7 +102,7 @@ function createSearchBar() {
         }
 
         searchTerms = searchTerms.map(term => term.trim());
-        
+
         let foundResults = findItems(items, searchTerms);
         foundResults.forEach(item => item.classList.add('found'));
     });
@@ -171,13 +174,19 @@ function createSearchBar() {
         overflow: hidden !important;
     }
 
+    .sidebar-inner
+    {
+        overflow-y: auto; 
+        flex: 1;
+    }
+
     .items
     {
         min-height: unset !important;
         overflow-y: scroll;
 
         width: 100%;
-        min-height: calc(100% - 75px) !important;
+        height: 100%;
         
         display: flex;
         flex-wrap: wrap;
@@ -297,6 +306,9 @@ function updateItemCount() {
 // ██████╔╝██║  ██║██║  ██║██║  ██╗
 // ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
+var darkModeIcon = 'https://neal.fun/infinite-craft/dark-mode-on.svg';
+var lightModeIcon = 'https://neal.fun/infinite-craft/dark-mode.svg';
+
 /** Toggles dark mode on the page */
 function toggleDarkMode() {
     let html = document.querySelector('html');
@@ -305,6 +317,10 @@ function toggleDarkMode() {
     // save dark mode state to local storage
     let darkMode = localStorage.getItem('darkMode') === 'true';
     localStorage.setItem('darkMode', !darkMode);
+
+    // replace the icon with the other icon
+    let darkModeButton = document.querySelector('.dark-mode-button');
+    darkModeButton.src = darkMode ? lightModeIcon : darkModeIcon;
 }
 
 /** Sets dark mode based on local storage */
@@ -326,7 +342,10 @@ function addDarkModeButton() {
     if (localStorage.getItem('darkMode') === 'true')
         html.classList.add('invert');
 
-    let darkModeButton = createImgAndAppend(controls, { src: 'https://www.svgrepo.com/show/309493/dark-theme.svg', alt: 'Dark Mode', className: 'dark-mode-button' }, true);
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+    let icon = isDarkMode ? darkModeIcon : lightModeIcon;
+
+    let darkModeButton = createImgAndAppend(controls, { src: icon, alt: 'Dark Mode', className: 'dark-mode-button' }, true);
 
     darkModeButton.addEventListener('click', toggleDarkMode);
 
@@ -336,6 +355,10 @@ function addDarkModeButton() {
         cursor: pointer;
     }
     `, 'bane-dark-mode-button-css');
+
+    // delete the existing dark mode button (.dark-mode-icon)
+    let oldDarkModeButton = document.querySelector('.dark-mode-icon');
+    if (oldDarkModeButton) oldDarkModeButton.remove();
 }
 //#endregion
 
@@ -465,7 +488,7 @@ function addCheatMode() {
 
             function cheatyOrder(items) {
                 let order = [];
-                 items.forEach(item => order.push(item.textContent.split('\n')[1].trim()));
+                items.forEach(item => order.push(item.textContent.split('\n')[1].trim()));
                 // sort the order array alphabetically
                 order.sort();
                 return order.join(' + ');
