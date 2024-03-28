@@ -1,47 +1,106 @@
 // ==UserScript==
 // @name         PhotopeaTweaks
 // @namespace    Bane
-// @version      0.1
+// @version      0.1.1
 // @description  Tweaks to Photopea.
 // @author       Bane
-// @match        https://www.photopea.com/
+// @match        https://www.photopea.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=photopea.com
 // @grant        none
 // ==/UserScript==
 
 // ==ChangeLog==
-// 0.1 - Initial version
-//     - Added buttons to support custom sizes in the new project window
-//        - Includes TVDB and Fanart.tv size templates
-//        - Mimics the style of the existing predefined sizes
+// 0.1.0    - Initial version
+//          - Added buttons to support custom sizes in the new project window
+//              - Includes TVDB and Fanart.tv size templates
+//              - Mimics the style of the existing predefined sizes
+// 0.1.1    - Added double-click to sizes to instantly create the project
+//          - Added the rest of the main TVDB and Fanart.tv sizes
+//          - Added a conversion object to convert the unit to the correct value for where it is used
+//          - Added a TODO list
+//          - Updated URL match to include more than just the homepage
+//              - This should now fix loading in images externally and the desktop app
+//          - Updated size template
+//              - Dropped the need for a fullUnit (ie: "pixels"), instead converting the unit when needed
+//              - Added support for background colors in the size templates
+//              - Added support for custom background colors in the size templates
 // ==/ChangeLog==
+
+// ==TODO==
+//      - Add a way to save custom sizes from the new project window
+//      - Save/Load custom sizes from local storage
+//      - Add more size templates
+//      - Find a way to add rulers to the canvas
+// ==/TODO==
+
+// ==Photopea Notes==
+//     - When using % as a unit in creation, "100%" width is 1280px, and "100%" height is 720px
+// ==/Photopea Notes==
+
+//================================================================================================================//
+
+// ██╗███╗   ██╗██╗████████╗
+// ██║████╗  ██║██║╚══██╔══╝
+// ██║██╔██╗ ██║██║   ██║   
+// ██║██║╚██╗██║██║   ██║   
+// ██║██║ ╚████║██║   ██║   
+// ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   
 
 // Size Templates
 // Each size template has a label (a group name) and an array of size objects
-// Each size object has a name, width, height, unit, and unitShort
-// An example size object is:
-// { name: 'Poster', width: 680, height: 1000, unit: 'pixels', unitShort: 'px' }
+// Each size object has the following properties:
+//    - name: The name of the size
+//    - width: The width of the size
+//    - height: The height of the size
+//    - unit: The unit of the size (px, %, cm, mm, in)
+//    - background: The background color of the size (optional) (white, black, transparent, or a hex color)
 var sizeTemplates = [
+    // {
+    //     label: 'Test',
+    //     sizes: [
+    //         { name: 'Normal 100x100', width: 100, height: 100, unit: 'px' },
+    //         { name: 'Transparent 100x100', width: 100, height: 100, unit: 'px', background: 'transparent' },
+    //         { name: 'White 100x100', width: 100, height: 100, unit: 'px', background: 'white' },
+    //         { name: 'Black 100x100', width: 100, height: 100, unit: 'px', background: 'black' },
+    //         { name: 'Custom 100x100', width: 100, height: 100, unit: 'px', background: '#ff00ff' },
+    //     ]
+    // },
     {
         label: 'TVDB',
         sizes: [
-            { name: 'Poster', width: 680, height: 1000, unit: 'pixels', unitShort: 'px' },
-            { name: 'Banner', width: 758, height: 140, unit: 'pixels', unitShort: 'px' },
-            { name: 'Background', width: 1920, height: 1080, unit: 'pixels', unitShort: 'px' },
-            { name: 'Episode (4:3)', width: 640, height: 480, unit: 'pixels', unitShort: 'px' },
-            { name: 'Episode (16:9)', width: 640, height: 360, unit: 'pixels', unitShort: 'px' },
+            { name: 'Poster', width: 680, height: 1000, unit: 'px' },
+            { name: 'Banner', width: 758, height: 140, unit: 'px' },
+            { name: 'Clearlogo', width: 800, height: 310, unit: 'px', background: 'transparent' },
+            { name: 'Background', width: 1920, height: 1080, unit: 'px' },
+            { name: 'Episode (4:3)', width: 640, height: 480, unit: 'px' },
+            { name: 'Episode (16:9)', width: 640, height: 360, unit: 'px' },
+            { name: 'Clearart', width: 1000, height: 562, unit: 'px', background: 'transparent' },
+            { name: 'Icon', width: 1024, height: 1024, unit: 'px' },
+            { name: 'Actor/Character', width: 300, height: 450, unit: 'px' },
         ]
     },
     {
         label: 'Fanart.tv',
         sizes: [
-            { name: 'Thumbnail', width: 1000, height: 562, unit: 'pixels', unitShort: 'px' },
-            { name: 'Poster', width: 1000, height: 1426, unit: 'pixels', unitShort: 'px' },
-            { name: 'Banner', width: 1000, height: 185, unit: 'pixels', unitShort: 'px' },
-            { name: 'Background', width: 1920, height: 1080, unit: 'pixels', unitShort: 'px' },
+            { name: 'Poster', width: 1000, height: 1426, unit: 'px' },
+            { name: 'Banner', width: 1000, height: 185, unit: 'px' },
+            { name: 'Thumb', width: 1000, height: 562, unit: 'px' },
+            { name: 'ClearLogo', width: 800, height: 310, unit: 'px', background: 'transparent' },
+            { name: 'Background', width: 1920, height: 1080, unit: 'px' },
+            { name: 'ClearART', width: 1000, height: 562, unit: 'px', background: 'transparent' },
+            { name: 'Character Art', width: 512, height: 512, unit: 'px' },
         ]
     }
 ];
+
+// Store the unit name conversions
+const unitConversion = {
+    'px': 'pixels',
+    '%': 'percent',
+    'cm': 'centimeters',
+    'mm': 'millimeters',
+    'in': 'inches',
+};
 
 // wait for the new project window to appear
 var interval = setInterval(function () {
@@ -56,19 +115,24 @@ var interval = setInterval(function () {
 }, 100);
 
 
+// ███╗   ███╗ █████╗ ██╗███╗   ██╗
+// ████╗ ████║██╔══██╗██║████╗  ██║
+// ██╔████╔██║███████║██║██╔██╗ ██║
+// ██║╚██╔╝██║██╔══██║██║██║╚██╗██║
+// ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║
+// ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝
+
+// Spawn a button in the new project window to add custom sizes
 function spawnSizeTemplateButton(label, sizes) {
     // if the button already exists, return
     if (document.querySelector('.newproject .fitem:is(:contains("' + label + '"))')) return;
 
-    // find .newproject, and find the button with innertext "Print" to get the parent
+    // find the new project window
     var newProjectWindow = document.querySelector('.newproject');
+    
+    // find the button with innertext "Print" to get the parent
     var buttons = newProjectWindow.querySelectorAll('button.fitem');
-
-    var printButton = null;
-    buttons.forEach(function (button) {
-        if (button.innerText.includes('Print'))
-            printButton = button;
-    });
+    var printButton = buttons.find(button => button.innerText.includes('Print'));
     var sizeGroupButtonContainer = printButton.parentElement;
 
     // find all the buttons in that parent and add an event listener to them
@@ -91,80 +155,122 @@ function spawnSizeTemplateButton(label, sizes) {
         applyAppropriateActiveButtonStatus(sizeGroupButtonContainer, sizeTemplateButton);
 
         sizes.forEach(function (size) {
-            var customSize = document.createElement('div');
-            customSize.className = 'customsize';
+            var customSize = createElementAndAppend(imageSet, { className: 'customsize' });
             customSize.style.width = '100px';
             customSize.style.height = '100px';
 
-            // calculate the ratio
+            var ratioPreview = createElementAndAppend(customSize, { className: 'customsize--ratioPreview' });
+
+            // calculate the ratio preview size, keeping it within 80x50
+            var width, height;
             var ratio = size.width / size.height;
-
-            var ratioPreview = document.createElement('div');
-            ratioPreview.className = 'customsize--ratioPreview';
-
-            // resize the ratioPreview div based on the ratio
-            // the maximum height of the ratioPreview div is 50px
-            // the maximum width of the ratioPreview div is 95px
-
             if (ratio > 1) { // width is bigger
-                width = 80;
+                width = Math.min(80, 50 * ratio);
                 height = width / ratio;
-
-                // if the height is bigger than 50px, shrink the width
-                if (height > 50) {
-                    height = 50;
-                    width = 50 * ratio;
-                }
-
-                ratioPreview.style.width = width + 'px';
-                ratioPreview.style.height = height + 'px';
-            }
-            else { // height is bigger
-                height = 50;
+            } else { // height is bigger
+                height = Math.min(50, 95 / ratio);
                 width = height * ratio;
-
-                // if the width is bigger than 95px, shrink the height
-                if (width > 95) {
-                    width = 95;
-                    height = 95 / ratio;
-                }
-
-                ratioPreview.style.width = width + 'px';
-                ratioPreview.style.height = height + 'px';
             }
 
-            customSize.appendChild(ratioPreview);
+            ratioPreview.style.width = width + 'px';
+            ratioPreview.style.height = height + 'px';
 
-            var nameLabel = createBasicElement('customsize--Name', size.name);
-            customSize.appendChild(nameLabel);
+            // Create name and size labels
+            createElementAndAppend(customSize, { className: 'customsize--Name', text: size.name });
+            createElementAndAppend(customSize, { className: 'customsize--Size', text: `${size.width}x${size.height} ${size.unit}` });
 
-            var sizeText = createBasicElement('customsize--Size', `${size.width}x${size.height} ${size.unitShort}`);
-            customSize.appendChild(sizeText);
+            const inputIds = {
+                width: '405',
+                unit: 'dd406',
+                height: '407',
+                background: 'dd411',
+                colorHex: '483'
+            };
 
+            const defaultColorOptions = [
+                'white',
+                'black',
+                'transparent',
+            ];
+
+            function setElementValue(id, value) {
+                if (!value || !id) return;                                                  // if invalid inputs, return
+
+                const element = document.querySelector(`.newproject [id="${id}"]`);         // find the element by id
+                if (!element) return console.error('Element not found:', id, value);        // if element not found, return
+
+                if (id.includes('dd')) {                                                    // if the element is a dropdown
+                    var option = Array.from(element.options).find(function (option) {       // find the option that matches the value
+                        return option.innerText.toLowerCase() === value.toLowerCase();      // case-insensitive comparison
+                    });
+                    value = option.value || 0;                                              // default to 0 if no value found
+                }
+
+                element.value = value;                                                      // set the value
+                element.dispatchEvent(new Event('change'));                                 // trigger event to update value
+            }
+
+            function setColourValue(id, value) {
+                // first find the colorsample element
+                var colorSample = document.querySelector('.colorsample');
+                if (!colorSample) return;
+
+                // add a # to the value if it doesn't have one
+                if (!value.startsWith('#')) value = '#' + value;
+
+                // click the colorsample element to open the color picker
+                colorSample.click();
+
+                var colorPicker = document.querySelector('.colorpicker');
+
+                // find the color input and set the value
+                var colorInput = colorPicker.querySelector(`[id="${id}"]`);
+                if (colorInput) colorInput.value = value;
+
+                // trigger the change event on the color input
+                colorInput.dispatchEvent(new Event('change'));
+
+                // find the "OK" button in the color picker and click it
+                var buttons = colorPicker.querySelectorAll('button');
+                var okButton = Array.from(buttons).find(button => button.innerText.toLowerCase() === 'ok');
+                okButton.click();
+
+                // change the color sample to the new color
+                colorSample.style.backgroundColor = value;
+
+            }
 
             customSize.addEventListener('click', function () {
                 // set the width input value to size.width and trigger the change event
-                var widthInput = document.querySelector('.newproject input[id="405"]');
-                widthInput.value = size.width;
-                widthInput.dispatchEvent(new Event('change'));
+                setElementValue(inputIds.width, size.width);
 
-                // find the unit select input and set the value to size.unit
-                var unitInput = document.querySelector('.newproject select[id="dd406"]');
-                var unitOption = Array.from(unitInput.options).find(function (option) {
-                    return option.innerText.toLowerCase() === size.unit.toLowerCase();
-                });
-                unitInput.value = unitOption.value || 0;
+                // find the unit select input and set the value to the size's unit
+                setElementValue(inputIds.unit, unitConversion[size.unit]);
 
                 // set the height input value to size.height and trigger the change event
-                var heightInput = document.querySelector('.newproject input[id="407"]');
-                heightInput.value = size.height;
-                heightInput.dispatchEvent(new Event('change'));
+                setElementValue(inputIds.height, size.height);
+
+                // set the background input value to the size's background color
+                if (!size.background) size.background = 'white';
+                // if the background color is not in the default options, set it to custom
+                if (!defaultColorOptions.includes(size.background.toLowerCase())) {
+                    setElementValue(inputIds.background, 'custom');
+                    setColourValue(inputIds.colorHex, size.background);
+                } else {
+                    setElementValue(inputIds.background, size.background);
+                }
             });
 
+            // add double-click handler
+            customSize.addEventListener('dblclick', function () {
+                // run the click event
+                customSize.click();
 
-
-
-            imageSet.appendChild(customSize);
+                // find the "Create" button in the window and click it
+                var buttons = document.querySelectorAll('.newproject button');
+                var createButton = Array.from(buttons).find(button => button.innerText.includes('Create'));
+                createButton.click();
+            });
         });
     });
 
@@ -232,15 +338,45 @@ function spawnSizeTemplateButton(label, sizes) {
     addCSSToHead(css, 'sizeTemplateCSS');
 }
 
+// ██╗  ██╗███████╗██╗     ██████╗ ███████╗██████╗ 
+// ██║  ██║██╔════╝██║     ██╔══██╗██╔════╝██╔══██╗
+// ███████║█████╗  ██║     ██████╔╝█████╗  ██████╔╝
+// ██╔══██║██╔══╝  ██║     ██╔═══╝ ██╔══╝  ██╔══██╗
+// ██║  ██║███████╗███████╗██║     ███████╗██║  ██║
+// ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝
 
-// Helper Functions
+// DOM Functions
 
-function createBasicElement(className, text, tag = 'div') {
+function createBasicElement(className, text, tag = 'div') {         // To Be Removed Eventually
     var element = document.createElement(tag);
     element.className = className;
     element.innerText = text;
     return element;
 }
+
+function createElement(options = {}) {
+    const {
+        type = 'div',
+        text = '',
+        className = '',
+        id = ''
+    } = options
+
+    let element = document.createElement(type);
+    if (text) element.textContent = text;
+    if (className) element.className = className;
+    if (id) element.id = id;
+
+    return element;
+}
+
+function createElementAndAppend(parent, options = {}) {
+    const element = createElement(options);
+    parent.appendChild(element);
+    return element;
+}
+
+// State Functions
 
 function applyAppropriateActiveButtonStatus(container, activeButton, statusClass = 'bactive') {
     container.querySelectorAll('button').forEach(function (button) {
@@ -250,6 +386,7 @@ function applyAppropriateActiveButtonStatus(container, activeButton, statusClass
     activeButton.classList.add(statusClass);
 }
 
+// CSS Functions
 
 function addCSSToHead(css, id) {
     if (document.getElementById(id)) return;
