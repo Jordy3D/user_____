@@ -132,7 +132,7 @@ function spawnSizeTemplateButton(label, sizes) {
     
     // find the button with innertext "Print" to get the parent
     var buttons = newProjectWindow.querySelectorAll('button.fitem');
-    var printButton = buttons.find(button => button.innerText.includes('Print'));
+    var printButton = Array.from(buttons).find(button => button.innerText.includes('Print'));
     var sizeGroupButtonContainer = printButton.parentElement;
 
     // find all the buttons in that parent and add an event listener to them
