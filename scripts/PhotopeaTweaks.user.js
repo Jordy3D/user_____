@@ -129,10 +129,9 @@ function spawnSizeTemplateButton(label, sizes) {
 
     // find the new project window
     var newProjectWindow = document.querySelector('.newproject');
-    
+        
     // find the button with innertext "Print" to get the parent
-    var buttons = newProjectWindow.querySelectorAll('button.fitem');
-    var printButton = Array.from(buttons).find(button => button.innerText.includes('Print'));
+    var printButton = findElementWithText('Print', newProjectWindow, 'button.fitem');
     var sizeGroupButtonContainer = printButton.parentElement;
 
     // find all the buttons in that parent and add an event listener to them
@@ -164,14 +163,14 @@ function spawnSizeTemplateButton(label, sizes) {
             // calculate the ratio preview size, keeping it within 80x50
             var width, height;
             var ratio = size.width / size.height;
-            if (ratio > 1) { // width is bigger
+            if (ratio > 1) {                            // width is bigger
                 width = Math.min(80, 50 * ratio);
                 height = width / ratio;
-            } else { // height is bigger
+            } else {                                    // height is bigger
                 height = Math.min(50, 95 / ratio);
                 width = height * ratio;
             }
-
+            // set the size
             ratioPreview.style.width = width + 'px';
             ratioPreview.style.height = height + 'px';
 
@@ -187,89 +186,65 @@ function spawnSizeTemplateButton(label, sizes) {
                 colorHex: '483'
             };
 
-            const defaultColorOptions = [
-                'white',
-                'black',
-                'transparent',
-            ];
+            const defaultColorOptions = [ 'white', 'black', 'transparent' ];
 
             function setElementValue(id, value) {
-                if (!value || !id) return;                                                  // if invalid inputs, return
+                if (!value || !id) return;                                              // if invalid inputs, return
 
-                const element = document.querySelector(`.newproject [id="${id}"]`);         // find the element by id
-                if (!element) return console.error('Element not found:', id, value);        // if element not found, return
+                const element = document.querySelector(`.newproject [id="${id}"]`);     // find the element by id
+                if (!element) return console.error('Element not found:', id, value);    // if element not found, return
 
-                if (id.includes('dd')) {                                                    // if the element is a dropdown
-                    var option = Array.from(element.options).find(function (option) {       // find the option that matches the value
-                        return option.innerText.toLowerCase() === value.toLowerCase();      // case-insensitive comparison
+                if (id.includes('dd')) {                                                // if the element is a dropdown
+                    var option = Array.from(element.options).find(function (option) {   // find the option that matches the value
+                        return option.innerText.toLowerCase() === value.toLowerCase();  // case-insensitive comparison
                     });
-                    value = option.value || 0;                                              // default to 0 if no value found
+                    value = option.value || 0;                                          // default to 0 if no value found
                 }
 
-                element.value = value;                                                      // set the value
-                element.dispatchEvent(new Event('change'));                                 // trigger event to update value
+                element.value = value;                                                  // set the value
+                element.dispatchEvent(new Event('change'));                             // trigger event to update value
             }
 
             function setColourValue(id, value) {
-                // first find the colorsample element
-                var colorSample = document.querySelector('.colorsample');
-                if (!colorSample) return;
+                var colorSample = document.querySelector('.colorsample');               // find the colorsample element
+                if (!colorSample) return;                                               // if not found, return
 
-                // add a # to the value if it doesn't have one
-                if (!value.startsWith('#')) value = '#' + value;
+                if (!value.startsWith('#')) value = '#' + value;                        // add # if not present
 
-                // click the colorsample element to open the color picker
-                colorSample.click();
+                colorSample.style.backgroundColor = value;                              // set the color sample to the new color
+                colorSample.click();                                                    // open the color picker
 
-                var colorPicker = document.querySelector('.colorpicker');
+                var colorPicker = document.querySelector('.colorpicker');               // find the color picker window
 
-                // find the color input and set the value
-                var colorInput = colorPicker.querySelector(`[id="${id}"]`);
-                if (colorInput) colorInput.value = value;
+                var colorInput = colorPicker.querySelector(`[id="${id}"]`);             // find the color input
+                colorInput.value = value;                                               // set the value
+                colorInput.dispatchEvent(new Event('change'));                          // trigger change event
 
-                // trigger the change event on the color input
-                colorInput.dispatchEvent(new Event('change'));
-
-                // find the "OK" button in the color picker and click it
-                var buttons = colorPicker.querySelectorAll('button');
+                var buttons = colorPicker.querySelectorAll('button');                   // find the OK button
                 var okButton = Array.from(buttons).find(button => button.innerText.toLowerCase() === 'ok');
-                okButton.click();
-
-                // change the color sample to the new color
-                colorSample.style.backgroundColor = value;
-
+                okButton.click();                                                       // click the OK button
             }
 
             customSize.addEventListener('click', function () {
-                // set the width input value to size.width and trigger the change event
-                setElementValue(inputIds.width, size.width);
+                setElementValue(inputIds.width, size.width);                            // set the width input value to size.width
+                setElementValue(inputIds.unit, unitConversion[size.unit]);              // convert the unit to the correct value
+                setElementValue(inputIds.height, size.height);                          // set the height input value to size.height
 
-                // find the unit select input and set the value to the size's unit
-                setElementValue(inputIds.unit, unitConversion[size.unit]);
-
-                // set the height input value to size.height and trigger the change event
-                setElementValue(inputIds.height, size.height);
-
-                // set the background input value to the size's background color
-                if (!size.background) size.background = 'white';
-                // if the background color is not in the default options, set it to custom
-                if (!defaultColorOptions.includes(size.background.toLowerCase())) {
-                    setElementValue(inputIds.background, 'custom');
-                    setColourValue(inputIds.colorHex, size.background);
-                } else {
-                    setElementValue(inputIds.background, size.background);
+                if (!size.background) size.background = 'white';                        // if no background color, default to white
+                if (!defaultColorOptions.includes(size.background.toLowerCase())) {     // if the bg is not default, it's custom
+                    setElementValue(inputIds.background, 'custom');                     //  set the background dropdown to custom
+                    setColourValue(inputIds.colorHex, size.background);                 //  set the picker to the custom color
+                } else {                                                                // if the bg is a default value
+                    setElementValue(inputIds.background, size.background);              //  set the background dropdown
                 }
             });
 
-            // add double-click handler
+            // Double-Click to instantly create the project
             customSize.addEventListener('dblclick', function () {
-                // run the click event
-                customSize.click();
+                customSize.click();                                                     // set the values
 
-                // find the "Create" button in the window and click it
-                var buttons = document.querySelectorAll('.newproject button');
-                var createButton = Array.from(buttons).find(button => button.innerText.includes('Create'));
-                createButton.click();
+                var createButton = findElementWithText('Create', document, '.newproject button');
+                createButton.click();                                                   // find the create button and click it
             });
         });
     });
@@ -374,6 +349,10 @@ function createElementAndAppend(parent, options = {}) {
     const element = createElement(options);
     parent.appendChild(element);
     return element;
+}
+
+function findElementWithText(text, parent=document, query='button') {
+    return Array.from(parent.querySelectorAll(query)).find(button => button.innerText.includes(text));
 }
 
 // State Functions
