@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotopeaTweaks
 // @namespace    Bane
-// @version      0.1.1
+// @version      0.1.2
 // @description  Tweaks to Photopea.
 // @author       Bane
 // @match        https://www.photopea.com/*
@@ -24,6 +24,8 @@
 //              - Dropped the need for a fullUnit (ie: "pixels"), instead converting the unit when needed
 //              - Added support for background colors in the size templates
 //              - Added support for custom background colors in the size templates
+// 0.1.2    - Add a second set of input IDs for the new project window because they change in certain conditions
+//              - Conditions include making a new project after a project is already made, for some reason
 // ==/ChangeLog==
 
 // ==TODO==
@@ -186,6 +188,14 @@ function spawnSizeTemplateButton(label, sizes) {
                 colorHex: '483'
             };
 
+            const inputIds2 = {
+                width: '745',
+                unit: 'dd746',
+                height: '747',
+                background: 'dd751',
+                colorHex: '824'
+            }
+
             const defaultColorOptions = [ 'white', 'black', 'transparent' ];
 
             function setElementValue(id, value) {
@@ -226,6 +236,10 @@ function spawnSizeTemplateButton(label, sizes) {
             }
 
             customSize.addEventListener('click', function () {
+                // try and see if the element with the id exists, and if it doesn't, replace inputIds with inputIds2
+                var widthInput = document.querySelector(`.newproject [id="${inputIds.width}"]`);
+                if (!widthInput) inputIds = inputIds2;
+                
                 setElementValue(inputIds.width, size.width);                            // set the width input value to size.width
                 setElementValue(inputIds.unit, unitConversion[size.unit]);              // convert the unit to the correct value
                 setElementValue(inputIds.height, size.height);                          // set the height input value to size.height
