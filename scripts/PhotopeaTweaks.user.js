@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotopeaTweaks
 // @namespace    Bane
-// @version      0.1.2
+// @version      0.1.3
 // @description  Tweaks to Photopea.
 // @author       Bane
 // @match        https://www.photopea.com/*
@@ -26,13 +26,16 @@
 //              - Added support for custom background colors in the size templates
 // 0.1.2    - Add a second set of input IDs for the new project window because they change in certain conditions
 //              - Conditions include making a new project after a project is already made, for some reason
+// 0.1.3    - Modified the code for the custom size settings
+//              - Added a new known input ID set (are these randomly assigned or something?)
 // ==/ChangeLog==
 
 // ==TODO==
 //      - Add a way to save custom sizes from the new project window
 //      - Save/Load custom sizes from local storage
 //      - Add more size templates
-//      - Find a way to add rulers to the canvas
+//      - Find a way to add rulers to the canvas (found the Photopea script code to do so, need to find a way to trigger it when loading a preset)
+//      - Get custom input IDs dynamically
 // ==/TODO==
 
 // ==Photopea Notes==
@@ -131,7 +134,7 @@ function spawnSizeTemplateButton(label, sizes) {
 
     // find the new project window
     var newProjectWindow = document.querySelector('.newproject');
-        
+
     // find the button with innertext "Print" to get the parent
     var printButton = findElementWithText('Print', newProjectWindow, 'button.fitem');
     var sizeGroupButtonContainer = printButton.parentElement;
@@ -180,23 +183,16 @@ function spawnSizeTemplateButton(label, sizes) {
             createElementAndAppend(customSize, { className: 'customsize--Name', text: size.name });
             createElementAndAppend(customSize, { className: 'customsize--Size', text: `${size.width}x${size.height} ${size.unit}` });
 
-            const inputIds = {
-                width: '405',
-                unit: 'dd406',
-                height: '407',
-                background: 'dd411',
-                colorHex: '483'
-            };
+            // Store known input IDs for the new project window 
+            // TODO: Find a way to dynamically find these IDs
+            const inputIdSets = [
+                { width: '405', unit: 'dd406', height: '407', background: 'dd411', colorHex: '483' },
+                { width: '407', unit: 'dd408', height: '409', background: 'dd413', colorHex: '486' },
+                { width: '745', unit: 'dd746', height: '747', background: 'dd751', colorHex: '824' }
+            ];
 
-            const inputIds2 = {
-                width: '745',
-                unit: 'dd746',
-                height: '747',
-                background: 'dd751',
-                colorHex: '824'
-            }
-
-            const defaultColorOptions = [ 'white', 'black', 'transparent' ];
+            // Default color options for the background dropdown, excluding custom
+            const defaultColorOptions = ['white', 'black', 'transparent'];
 
             function setElementValue(id, value) {
                 if (!value || !id) return;                                              // if invalid inputs, return
@@ -236,10 +232,21 @@ function spawnSizeTemplateButton(label, sizes) {
             }
 
             customSize.addEventListener('click', function () {
-                // try and see if the element with the id exists, and if it doesn't, replace inputIds with inputIds2
-                var widthInput = document.querySelector(`.newproject [id="${inputIds.width}"]`);
-                if (!widthInput) inputIds = inputIds2;
-                
+
+                function findInputSet() {
+                    // find the input set that is currently visible by checking if the width input exists
+                    // find the width input, check if it exists, and if it does check to see if the label text is "Width:"
+                    for (let i = 0; i < inputIdSets.length; i++) {
+                        var inputIds = inputIdSets[i];
+                        var widthInput = document.querySelector(`.newproject [id="${inputIds.width}"]`);
+                        if (widthInput && widthInput.parentElement.innerText.includes('Width:')) {
+                            return inputIds;
+                        }
+                    }
+                }
+
+                var inputIds = findInputSet();                                          // find the input set
+
                 setElementValue(inputIds.width, size.width);                            // set the width input value to size.width
                 setElementValue(inputIds.unit, unitConversion[size.unit]);              // convert the unit to the correct value
                 setElementValue(inputIds.height, size.height);                          // set the height input value to size.height
@@ -365,7 +372,7 @@ function createElementAndAppend(parent, options = {}) {
     return element;
 }
 
-function findElementWithText(text, parent=document, query='button') {
+function findElementWithText(text, parent = document, query = 'button') {
     return Array.from(parent.querySelectorAll(query)).find(button => button.innerText.includes(text));
 }
 
