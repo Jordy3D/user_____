@@ -26,4 +26,5 @@ Install a userscript manager for your browser:
 | [JetSetRadio.live](https://jetsetradio.live/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/JSRLPlus.user.js) | Adds a volume slider to the radio, among other things. |
 | [Photopea](https://www.photopea.com/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/PhotopeaTweaks.user.js) | Adds a few tweaks to the UI, such as custom predifined sizes when creating a new document. |
 | [YouTube](https://www.youtube.com/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/YouTubePlus.user.js) | Adds a button on Shorts to view it as a video, buttons for formatting comments, and displays the video's tags in the description. |
+| [Moonbounce](https://moonbounce.gg/) | [Install](https://github.com/Jordy3D/user_____/raw/main/scripts/MoonbouncePlus.user.js) | At the moment, simply stores a list of items and recipes internally, and allows for the easy copying of that information to the clipboard. More to come! |
 
