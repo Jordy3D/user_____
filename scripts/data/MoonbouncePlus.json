@@ -171,6 +171,16 @@
             "sources": ["Assorted Goodie Bag"]
         },
         {
+            "id": 174,
+            "name": "Craftsman Blade",
+            "uuid": "ff9400ae-c339-487f-a34f-56c31699ce9e",
+            "description": "No,  it won't magically make crafting a breeze,  but it comes pretty close.",
+            "rarity": "COMMON",
+            "type": "TOOL",
+            "value": 5,
+            "sources": []
+        },
+        {
             "id": 175,
             "name": "Sewing Needle",
             "uuid": "2cb8ae87-7fb2-40ff-a65b-86c640bc42f7",
@@ -209,6 +219,16 @@
             "type": "MATERIAL",
             "value": 100,
             "sources": ["Framed Chest"]
+        },
+        {
+            "id": 180,
+            "name": "Shadow Essence",
+            "uuid": "d93477c0-db44-4a83-8206-aed5e42cad13",
+            "description": "When added to a cauldron,  the liquid should shimmer with a dark,  mysterious energy.",
+            "rarity": "RARE",
+            "type": "MATERIAL",
+            "value": 30,
+            "sources": ["Normal Candy Basket", "Framed Chest"]
         },
         {
             "id": 181,
@@ -561,6 +581,46 @@
             "sources": []
         },
         {
+            "id": 421,
+            "name": "Purple Bonnet",
+            "uuid": "8d64b2fd-7316-4800-8247-426d641821f3",
+            "description": "Sport the Purple Bonnet and level up your floral fashion game!",
+            "rarity": "UNCOMMON",
+            "type": "ACCESSORY",
+            "value": 100,
+            "sources": []
+        },
+        {
+            "id": 422,
+            "name": "Red Bonnet",
+            "uuid": "478000ed-de2d-4923-9ef7-09f774459d42",
+            "description": "Strut your stuff and let your character bloom brighter than ever!",
+            "rarity": "UNCOMMON",
+            "type": "ACCESSORY",
+            "value": 100,
+            "sources": []
+        },
+        {
+            "id": 423,
+            "name": "Flower Crown",
+            "uuid": "cd58771d-391d-49c2-83ef-7b2fd70ca17c",
+            "description": "Adds a sprinkle of spring to your characters's look,  making every day feel like a festival.",
+            "rarity": "LEGENDARY",
+            "type": "ACCESSORY",
+            "value": 500,
+            "sources": []
+        },
+        {
+            "id": 424,
+            "name": "3-D Glasses",
+            "uuid": "f0d492c1-1ba5-4377-98dc-2ed046dce66e",
+            "description": "It's a bit ironic,  isn't it?",
+            "rarity": "RARE",
+            "type": "ACCESSORY",
+            "value": 250,
+            "sources": []
+        },
+        {
             "id": 428,
             "name": "Bonnet Sprout",
             "uuid": "3a9aff43-e766-40ff-8303-10d32c963a80",
@@ -575,6 +635,26 @@
             "name": "Blue Flower Pot",
             "uuid": "04b5e0ea-b33b-4a9e-9857-553b114f613f",
             "description": "A splash of cool blue vibes that add to your pixel paradise",
+            "rarity": "RARE",
+            "type": "ACCESSORY",
+            "value": 250,
+            "sources": []
+        },
+        {
+            "id": 431,
+            "name": "Purple Flower Pot",
+            "uuid": "bed7a0b3-1d57-4523-8814-1468fb9286fa",
+            "description": "Elevate your accessory game to VIP status with this royal purple flower!",
+            "rarity": "RARE",
+            "type": "ACCESSORY",
+            "value": 250,
+            "sources": []
+        },
+        {
+            "id": 432,
+            "name": "Red Flower Pot",
+            "uuid": "d702e891-cd08-425e-917a-e7985519189d",
+            "description": "Adds a fiery touch to your pixel head,  making you the hottest spot in town.",
             "rarity": "RARE",
             "type": "ACCESSORY",
             "value": 250,
@@ -666,6 +746,16 @@
             "sources": ["Disco Mats"]
         },
         {
+            "id": 441,
+            "name": "Blue Lens",
+            "uuid": "eb0e939b-2fb1-4528-93ef-e68fc6288815",
+            "description": "Dive into a sea of virtual blues",
+            "rarity": "UNCOMMON",
+            "type": "MATERIAL",
+            "value": 15,
+            "sources": ["Disco Mats"]
+        },
+        {
             "id": 442,
             "name": "Gold Orb",
             "uuid": "67ed7dfb-c142-4d61-9da0-036f23150ff1",
@@ -704,6 +794,16 @@
             "type": "MATERIAL",
             "value": 5,
             "sources": ["Disco Mats"]
+        },
+        {
+            "id": 447,
+            "name": "Circuit",
+            "uuid": "3f04908e-59c7-4415-bda3-a69181e33935",
+            "description": "Get powered up with the Circuit! Add an electric buzz to your virtual toolkit,  sparking creativity with every connection.",
+            "rarity": "RARE",
+            "type": "MATERIAL",
+            "value": 250,
+            "sources": []
         },
         {
             "id": 460,
@@ -779,6 +879,16 @@
             "sources": ["Potion Supplies"]
         },
         {
+            "id": 502,
+            "name": "Twisted Pengu Collectible",
+            "uuid": "a74fa76a-c6e6-459e-ab86-088de8db5abd",
+            "description": "Found it on the floor beneath some grimy herbs in some druid’s barber shop",
+            "rarity": "LEGENDARY",
+            "type": "MATERIAL",
+            "value": 500,
+            "sources": ["JoshIsn't Crate"]
+        },
+        {
             "id": 504,
             "name": "Orange Wizard Hat",
             "uuid": "709bd11d-4f92-4ea6-8998-9d2d93a61550",
@@ -809,6 +919,16 @@
             "sources": ["JoshIsn't Crate"]
         },
         {
+            "id": 507,
+            "name": "Mithril Helmet",
+            "uuid": "a4dcb39b-6a77-48c1-890c-396340ecb24e",
+            "description": "Straight from a realm where the grind is real and “buying gf” is a legitimate currency,  the Mithril Helm is the perfect addition to any inventory.",
+            "rarity": "RARE",
+            "type": "ACCESSORY",
+            "value": 250,
+            "sources": []
+        },
+        {
             "id": 508,
             "name": "Steel Med",
             "uuid": "332d18cf-b6b8-4202-922b-dc218c23fc03",
@@ -817,6 +937,26 @@
             "type": "ACCESSORY",
             "value": 15,
             "sources": ["JoshIsn't Crate"]
+        },
+        {
+            "id": 509,
+            "name": "Beaver Plushie",
+            "uuid": "ad9e342d-b28c-4f6d-8d71-3ccdc0ce4e22",
+            "description": "Ethically sourced beavers only. We’re not monsters",
+            "rarity": "RARE",
+            "type": "ACCESSORY",
+            "value": 250,
+            "sources": ["JoshIsn't Crate"]
+        },
+        {
+            "id": 538,
+            "name": "Bucket of Magic Glue",
+            "uuid": "e6e351ce-7520-492b-be7d-59cac468c187",
+            "description": "Okay,  hear me out… I know it sounds sus,  but consuming this will get you shouted out in Alien Food’s next video",
+            "rarity": "RARE",
+            "type": "MATERIAL",
+            "value": 250,
+            "sources": []
         },
         {
             "id": 540,
@@ -836,6 +976,16 @@
             "rarity": "RARE",
             "type": "ACCESSORY",
             "value": null,
+            "sources": []
+        },
+        {
+            "id": 544,
+            "name": "Gold Spellcap",
+            "uuid": "32f5fc5a-e8f7-4d35-9452-b35aa773625d",
+            "description": "Well,  well,  well,  look who's ready to unleash their inner mage! Remember,  with great fashion comes great responsibility!",
+            "rarity": "UNCOMMON",
+            "type": "ACCESSORY",
+            "value": 100,
             "sources": []
         },
         {
@@ -877,10 +1027,20 @@
             "type": "MATERIAL",
             "value": 10,
             "sources": []
+        },
+        {
+            "id": 559,
+            "name": "Polished Moonstone",
+            "uuid": "fa8edc7b-fa72-4797-9ccc-882983a046ca",
+            "description": "So Keith claims these smoothed-out space nuggets come \"legit\" too,  but the precise laser-scoring seems suspicious right? Either way,  our crafting team swears by these fragments.",
+            "rarity": "RARE",
+            "type": "MATERIAL",
+            "value": 150,
+            "sources": []
         }
     ],
 
-    "recipies": [
+    "recipes": [
         {
             "result": "Wizard Hat",
             "ingredients": ["Minor Magic Potion", "Smooth Silk"],
