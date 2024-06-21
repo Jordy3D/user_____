@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Moonbounce Plus
 // @namespace    Bane
-// @version      0.3.2
+// @version      0.3.3
 // @description  A few handy tools for Moonbounce
 // @author       Bane
 // @match        https://moonbounce.gg/u/@me/*
@@ -26,6 +26,7 @@
 //          - Modified the script to load the data from the JSON file
 //          - Modified the data extraction to extract as JSON rather than as a javascript object
 //          - Code cleanup and reorganization
+// 0.3.3    - Changed the Selected Item Window class to a new one (Moonbounce updated their site)
 //
 // ==/Changelog==
 
@@ -89,7 +90,7 @@ function loadData(isLocal = false) {
  */
 const targetClasses = [
     { name: "Inventory", class: ".cfWcg" },
-    { name: "Selected Item Window", class: "._base_1h3kk_1" },
+    { name: "Selected Item Window", class: "._base_adyd1_1" },
     { name: "Selected Item Details", class: "._base_awewl_1" },
     { name: "Moonbounce Portal Buttons", class: "._base_11wdf_1" },
     { name: "Source List Item", class: ".mSsVp" },
