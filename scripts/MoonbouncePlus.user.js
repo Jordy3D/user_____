@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Moonbounce Plus
 // @namespace    Bane
-// @version      0.3.3
+// @version      0.4.0
 // @description  A few handy tools for Moonbounce
 // @author       Bane
 // @match        https://moonbounce.gg/u/@me/*
@@ -27,17 +27,15 @@
 //          - Modified the data extraction to extract as JSON rather than as a javascript object
 //          - Code cleanup and reorganization
 // 0.3.3    - Changed the Selected Item Window class to a new one (Moonbounce updated their site)
+// 0.4.0    - Added a Ponder button to check if any recipes can be crafted with the items in the inventory (that aren't already in the inventory)
 //
 // ==/Changelog==
 
 // ==TODO==
 //
 // - Add more items and recipes (endless task)
-// - Add more classes to find elements on the page
+// - Add more classes to find elements on the page (endless task)
 // - Add buttons to go to the Marketplace and Backpack on the Moonbounce Portal (whenever it's active on a page)
-// - Add a notification when an item is copied to the clipboard
-// - Add a notification when the item info is copied to the clipboard
-// - Add a notification when a recipe is able to be crafted
 //
 // ==/TODO==
 
@@ -57,14 +55,17 @@ var recipes = null;
  * @param {boolean} isLocal whether to load the data locally or from the web
  */
 function loadData(isLocal = false) {
+    console.log("Loading data...");
+
     if (isLocal) {
         var data = require('./data/MoonbouncePlus.json');
         items = data.items;
         recipes = data.recipes;
+
         return;
     }
 
-    var url = 'https://github.com/Jordy3D/user_____/raw/main/scripts/data/MoonbouncePlus.json';
+    var url = 'https://raw.githack.com/Jordy3D/user_____/main/scripts/data/MoonbouncePlus.json';
 
     // use an XMLHttpRequest to get the data
     var xhr = new XMLHttpRequest();
@@ -75,12 +76,19 @@ function loadData(isLocal = false) {
         if (status === 200) {
             console.log(xhr.response);
 
+            // get the items and recipes from the response json
             items = xhr.response.items;
-            recipes = xhr.response.recipes;
+            recipes = xhr.response.recipes || xhr.response.recipies;    // I misspelled recipes in the JSON file at first
+
+            console.log("Data loaded successfully");
+            console.log(`Items: ${items.length}`);
+            console.log(`Recipes: ${recipes.length}`);
+
         } else {
             console.error('Failed to load data');
         }
     };
+    xhr.send();
 }
 
 /**
@@ -90,6 +98,7 @@ function loadData(isLocal = false) {
  */
 const targetClasses = [
     { name: "Inventory", class: ".cfWcg" },
+    { name: "Inventory Controls", class: ".S-h7a" },
     { name: "Selected Item Window", class: "._base_adyd1_1" },
     { name: "Selected Item Details", class: "._base_awewl_1" },
     { name: "Moonbounce Portal Buttons", class: "._base_11wdf_1" },
@@ -115,8 +124,9 @@ const getTargetURL = name => targetURLs.find(x => x.name == name).url;
 var isWebDoc = typeof document !== 'undefined';
 
 if (isWebDoc) {                 // Actual Web Script
-
+    loadData();
     setInterval(addCopyDetailstoItemImage, 1000);
+    setInterval(addPonderButton, 1000);
 }
 else {                          // Local Debugging Script
     // import the local data/MoonbouncePlus.json file
@@ -158,8 +168,14 @@ else {                          // Local Debugging Script
         console.log(displayLog);
     }
 
+    function printIDs() {
+        for (let item of items)
+            console.log(`${item.id}`);
+    }
+
     // displayIncompleteItems();
     displayItems();
+    // printIDs();
 }
 
 
@@ -210,14 +226,7 @@ function addCopyDetailstoItemImage() {
         `, "copyDetailsToItemCSS");
     }
 
-    
-    function getUUIDFromSrc(src) {
-        let start = src.indexOf("/fp/") + 4;                                // find the index of /fp/ and add 4 to get the start of the uuid
-        let end = src.indexOf("/c/");                                       // find the index of /c/ to get the end of the uuid
-        let uuid = src.substring(start, end);                               // get the substring between the start and end
 
-        return uuid;
-    }
 
     function getDetails(details) {
         let nameIdBlock = details.children[0];                                  // get the first child of the details element
@@ -302,7 +311,144 @@ function addCopyDetailstoItemImage() {
 }
 
 
+function addInventoryControlBar() {
+    // find the inventory controls div
+    let inventoryControls = document.querySelector(getTargetClass("Inventory Controls"));
+    if (inventoryControls == null) return;
 
+    // if the inventory controls already have the bane-inventory-controls div, return
+    let existingContainer = document.querySelector("#bane-inventory-controls");
+    if (existingContainer != null) return existingContainer;
+
+    // create a new container div before the inventory controls
+    let container = document.createElement("div");
+    container.style.display = "flex";
+    container.id = "bane-inventory-controls";
+
+    inventoryControls.parentElement.insertBefore(container, inventoryControls);
+
+    return container;
+}
+
+
+function addPonderButton() {
+    // find the inventory controls div
+    let inventoryControls = document.querySelector(getTargetClass("Inventory Controls"));
+    if (inventoryControls == null) return;
+
+    // if the inventory controls already have the bane-ponder-button, return
+    let existingButton = document.querySelector("#bane-ponder-button");
+    if (existingButton != null) return;
+
+    // create a new container div after the inventory controls
+    let container = addInventoryControlBar();
+
+    // create a new button in the container
+    let button = document.createElement("button");
+    button.innerText = "Ponder";
+    button.id = "bane-ponder-button";
+
+    // add an event listener to the button
+    button.addEventListener("click", function () {
+        checkRecipes();
+    });
+
+    container.appendChild(button);
+
+    // add some CSS to the button
+    addCSS(`#bane-inventory-controls
+{
+  button
+  {
+    background: white;
+    border: 2px solid #E6E8EC;
+    color: #141416;
+
+    cursor: pointer;
+        
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 8px;
+    box-shadow: 0 1px 2px #1018280d;
+    border-radius: 8px;
+    transition: .2s;
+    
+    &:hover
+    {
+      background: #E6E8EC;
+      border-color: #d2d5de;
+    }
+  }
+}`, "inventoryControlsCSS");
+}
+
+/**
+ * Check if any recipes can be crafted with the items in the inventory.
+ */
+function checkRecipes() {
+    let inventory = findInventory();
+    if (inventory == null) return;
+
+    let inventoryItems = inventory.querySelectorAll("img");
+
+    let inventoryUUIDs = [];
+    for (let item of inventoryItems) {
+        let uuid = getUUIDFromSrc(item.src);
+        inventoryUUIDs.push(uuid);
+    }
+
+    var craftableRecipes = [];
+    for (let recipe of recipes) {
+
+        console.log(`Checking recipe: ${recipe.result}`);
+
+        let canCraft = true;
+        for (let ingredient of recipe.ingredients) {
+            let ingredientUUID = getUUIDFromItemName(ingredient);
+
+            // Check if the ingredient is in the inventory
+            if (!inventoryUUIDs.includes(ingredientUUID)) {
+                canCraft = false;
+                break;
+            }
+        }
+
+        if (canCraft)
+            craftableRecipes.push(recipe);
+    }
+
+    // check if there are any craftable recipes whose results are not in the inventory
+    let craftableResults = [];
+    for (let recipe of craftableRecipes) {
+        let resultUUID = getUUIDFromItemName(recipe.result);
+
+        if (!inventoryUUIDs.includes(resultUUID))
+            craftableResults.push(recipe);
+    }
+
+    let message = '';
+    // pick a craftable recipe at random and display a tooltip 
+    if (craftableResults.length > 0) {
+        let randomIndex = Math.floor(Math.random() * craftableResults.length);
+        let randomRecipe = craftableResults[randomIndex];
+
+        let article = ['a', 'e', 'i', 'o', 'u'].includes(randomRecipe.result[0].toLowerCase()) ? 'an' : 'a';
+        message = `I have a feeling you can craft ${article} ${randomRecipe.result}...`;
+    }
+    else {
+        message = `I don't think you can craft anything right now...`;
+    }
+
+    // spawn a notification under the cursor position
+    let pos = { top: event.clientY, left: event.clientX };              // get the current mouse position
+    pos.top += 10;                                                      // offset the position down by 10 pixels
+
+    floatingNotification(message, 3000, "background-color: #333; color: #fff; padding: 5px 10px; border-radius: 5px; transform: translateX(-50%);", { top: pos.top + "px", left: pos.left + "px" }, true);
+
+}
 
 
 // ██╗  ██╗███████╗██╗     ██████╗ ███████╗██████╗ 
@@ -365,6 +511,22 @@ function findMoonbouncePortal() {
 }
 
 
+function getUUIDFromSrc(src) {
+    let start = src.indexOf("/fp/") + 4;                                // find the index of /fp/ and add 4 to get the start of the uuid
+    let end = src.indexOf("/c/");                                       // find the index of /c/ to get the end of the uuid
+    let uuid = src.substring(start, end);                               // get the substring between the start and end
+
+    return uuid;
+}
+
+function getUUIDFromItemName(name) {
+    let resultItem = items.find(item => item.name == name);
+    let resultUUID = resultItem ? resultItem.uuid : null;
+
+    return resultUUID;
+}
+
+
 /**
  * Find the Moonbounce Portal buttons on the page
  */
@@ -408,14 +570,24 @@ function addCSS(css, id) {
  * @param {string} css the CSS styles for the notification
  * @param {string} position the position of the notification (top, top-right, top-left, bottom, bottom-right, bottom-left, center, position: absolute)
  */
-function floatingNotification(message, duration = 3000, css = "", position = "top") {
+function floatingNotification(message, duration = 3000, css = "", position = "top", deleteExisting = false) {
+
+    if (deleteExisting) {
+        let existingNotifications = document.querySelectorAll(".floating-notification");
+        for (let notification of existingNotifications)
+            notification.remove();
+    }
+
     let notification = document.createElement("div");
     notification.innerHTML = message;
-    notification.style.position = "fixed";
     notification.style.cssText = css;
+    notification.style.position = "fixed";
     notification.style.zIndex = 1000;
     notification.style.transition = "opacity 0.5s";
     notification.style.opacity = 1;
+    notification.style.pointerEvents = "none";
+
+    notification.classList.add("floating-notification");
 
     switch (position) {
         case "top":

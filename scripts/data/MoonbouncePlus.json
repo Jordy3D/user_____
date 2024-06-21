@@ -979,6 +979,16 @@
             "sources": []
         },
         {
+            "id": 543,
+            "name": "Zerk Mask",
+            "uuid": "b5c5934a-2b4c-4e7e-a55c-8ed3767aa3ae",
+            "description": "Forged in some unpronounceable ancient realm,  this mask tells the world that you're not just some ordinary pixel pusher,  but a force to be reckoned with!",
+            "rarity": "RARE",
+            "type": "ACCESSORY",
+            "value": 250,
+            "sources": []
+        },
+        {
             "id": 544,
             "name": "Gold Spellcap",
             "uuid": "32f5fc5a-e8f7-4d35-9452-b35aa773625d",
