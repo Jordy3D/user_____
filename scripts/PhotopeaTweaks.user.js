@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotopeaTweaks
 // @namespace    Bane
-// @version      0.1.3
+// @version      0.1.4
 // @description  Tweaks to Photopea.
 // @author       Bane
 // @match        https://www.photopea.com/*
@@ -28,6 +28,8 @@
 //              - Conditions include making a new project after a project is already made, for some reason
 // 0.1.3    - Modified the code for the custom size settings
 //              - Added a new known input ID set (are these randomly assigned or something?)
+// 0.1.4    - Added a new known input ID set
+//          - Modified the sanitation check for the ID to remove the colon, since it was removed in the UI
 // ==/ChangeLog==
 
 // ==TODO==
@@ -188,6 +190,7 @@ function spawnSizeTemplateButton(label, sizes) {
             const inputIdSets = [
                 { width: '405', unit: 'dd406', height: '407', background: 'dd411', colorHex: '483' },
                 { width: '407', unit: 'dd408', height: '409', background: 'dd413', colorHex: '486' },
+                { width: '410', unit: 'dd411', height: '412', background: 'dd416', colorHex: '489' },
                 { width: '745', unit: 'dd746', height: '747', background: 'dd751', colorHex: '824' }
             ];
 
@@ -239,7 +242,7 @@ function spawnSizeTemplateButton(label, sizes) {
                     for (let i = 0; i < inputIdSets.length; i++) {
                         var inputIds = inputIdSets[i];
                         var widthInput = document.querySelector(`.newproject [id="${inputIds.width}"]`);
-                        if (widthInput && widthInput.parentElement.innerText.includes('Width:')) {
+                        if (widthInput && widthInput.parentElement.innerText.includes('Width')) {
                             return inputIds;
                         }
                     }
