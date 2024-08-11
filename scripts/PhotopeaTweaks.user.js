@@ -191,6 +191,7 @@ function spawnSizeTemplateButton(label, sizes) {
                 { width: '405', unit: 'dd406', height: '407', background: 'dd411', colorHex: '483' },
                 { width: '407', unit: 'dd408', height: '409', background: 'dd413', colorHex: '486' },
                 { width: '410', unit: 'dd411', height: '412', background: 'dd416', colorHex: '489' },
+                { width: '692', unit: 'dd693', height: '694', background: 'dd698', colorHex: '771' },
                 { width: '745', unit: 'dd746', height: '747', background: 'dd751', colorHex: '824' }
             ];
 
