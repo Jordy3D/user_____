@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotopeaTweaks
 // @namespace    Bane
-// @version      0.1.4
+// @version      0.1.5
 // @description  Tweaks to Photopea.
 // @author       Bane
 // @match        https://www.photopea.com/*
@@ -30,6 +30,9 @@
 //              - Added a new known input ID set (are these randomly assigned or something?)
 // 0.1.4    - Added a new known input ID set
 //          - Modified the sanitation check for the ID to remove the colon, since it was removed in the UI
+// 0.1.5    - Implemented a way to find the correct input IDs dynamically (hopefully)
+//              - This should fix the issue of the input IDs changing between new versions and new projects within a session
+//
 // ==/ChangeLog==
 
 // ==TODO==
@@ -37,7 +40,6 @@
 //      - Save/Load custom sizes from local storage
 //      - Add more size templates
 //      - Find a way to add rulers to the canvas (found the Photopea script code to do so, need to find a way to trigger it when loading a preset)
-//      - Get custom input IDs dynamically
 // ==/TODO==
 
 // ==Photopea Notes==
@@ -185,6 +187,19 @@ function spawnSizeTemplateButton(label, sizes) {
             createElementAndAppend(customSize, { className: 'customsize--Name', text: size.name });
             createElementAndAppend(customSize, { className: 'customsize--Size', text: `${size.width}x${size.height} ${size.unit}` });
 
+            // find a label with the text "Width"
+            var widthLabel = findElementWithText('Width', document, '.newproject label');
+            // get the for attribute of that label
+            var widthLabelFor = widthLabel.getAttribute('for');
+            var widthId = parseInt(widthLabelFor);
+            var calcIdSet = {
+                width: `${widthId}`,
+                unit: `dd${widthId + 1}`,
+                height: `${widthId + 2}`,
+                background: `dd${widthId + 6}`,
+                colorHex: `${widthId + 79}`
+            }
+
             // Store known input IDs for the new project window 
             // TODO: Find a way to dynamically find these IDs
             const inputIdSets = [
@@ -192,7 +207,8 @@ function spawnSizeTemplateButton(label, sizes) {
                 { width: '407', unit: 'dd408', height: '409', background: 'dd413', colorHex: '486' },
                 { width: '410', unit: 'dd411', height: '412', background: 'dd416', colorHex: '489' },
                 { width: '692', unit: 'dd693', height: '694', background: 'dd698', colorHex: '771' },
-                { width: '745', unit: 'dd746', height: '747', background: 'dd751', colorHex: '824' }
+                { width: '745', unit: 'dd746', height: '747', background: 'dd751', colorHex: '824' },
+                calcIdSet
             ];
 
             // Default color options for the background dropdown, excluding custom
