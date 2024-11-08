@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    Audible
+// @site-url     https://www.audible.com/
+// @description  Adds a few buttons that make accessing/copying content easier.
+// ==/Tags==
+
 createDownloadSampleButton();
 
 createQuickURLButton();

@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    JB Hi-Fi
+// @site-url     https://www.jbhifi.com.au/
+// @description  Adds sorting options to your wishlist.
+// ==/Tags==
+
 // ==Change Log==
 // 0.1.0
 // - Initial release

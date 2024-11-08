@@ -10,6 +10,11 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    Discord
+// @site-url     https://discord.com/
+// @description  Makes messages starting with > look like a 4chan post.
+// ==/Tags==
 
 // Changelog
 // 1.0.0

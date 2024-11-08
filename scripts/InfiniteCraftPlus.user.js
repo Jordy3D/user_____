@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    Infinite Craft
+// @site-url     https://neal.fun/infinite-craft/
+// @description  Adds a dark theme, search functionality, and an item counter.
+// ==/Tags==
+
 // ==Change Log==
 // 0.1.0
 //  - Initial release

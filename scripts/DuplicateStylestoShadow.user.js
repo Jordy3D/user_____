@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @display-name Duplicate Styles to Shadow
+// @script-type  utility
+// @description  Duplicates all stylesheets to all Shadow Root elements (at least, at a basic level...) Will refresh every n milliseconds, to support live editing in tools like Stylus.
+// ==/Tags==
+
 
 
 const refreshRate = 1000;

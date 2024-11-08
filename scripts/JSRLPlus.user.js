@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    JetSetRadio.live
+// @site-url     https://jetsetradio.live/
+// @description  Adds a volume slider to the radio, among other things
+// ==/Tags==
+
 //== Change Log ==
 // 0.1.0
 // - Added Volume Slider

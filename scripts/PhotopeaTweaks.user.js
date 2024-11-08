@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    Photopea
+// @site-url     https://www.photopea.com/
+// @description  Adds a few tweaks to the UI, such as custom predifined sizes when creating a new document.
+// ==/Tags==
+
 // ==ChangeLog==
 // 0.1.0    - Initial version
 //          - Added buttons to support custom sizes in the new project window

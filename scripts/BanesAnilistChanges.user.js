@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Bane's Anilist Changes
-// @namespace    http://tampermonkey.net/
+// @namespace    Bane
 // @version      0.3
 // @description  Changes to Anilist that I like
 // @author       Bane
@@ -9,11 +9,18 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    Anilist
+// @site-url     https://www.anilist.co/
+// @description  A couple of minor things that make my life easier.<br>May cause slowdown on some pages...
+// ==/Tags==
+
 // ==ChangeLog==
 // 0.1 - Initial Release
 //     - Added To Watch Section
 // 0.2 - Added CSS Fix for List Preview
 // 0.3 - Fixed issue where switching pages sometimes didn't work or caused errors
+// ==/ChangeLog==
 
 var sourceListPreview = null;
 

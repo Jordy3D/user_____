@@ -9,6 +9,12 @@
 // @grant        none
 // ==/UserScript==
 
+// ==Tags==
+// @site-name    Arxiv
+// @site-url     https://arxiv.org/
+// @description  Adds a shortcut to the web version of the paper
+// ==/Tags==
+
 // find the .extra-services element
 var extraServices = document.getElementsByClassName("extra-services")[0];
 
