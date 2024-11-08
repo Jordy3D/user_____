@@ -1,13 +1,19 @@
 // ==UserScript==
 // @name         YouTube Plus
 // @namespace    Bane
-// @version      0.7.0
+// @version      0.8.0
 // @description  Adds features to YouTube
 // @author       Bane
 // @match        https://www.youtube.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // @grant        none
 // ==/UserScript==
+
+// ==Tags==
+// @site-name    YouTube
+// @site-url     https://www.youtube.com/
+// @description  Adds a button on Shorts to view it as a video, buttons for formatting comments, and displays the video's tags in the description.
+// ==/Tags==
 
 // ==Changelog==
 // Before I kept track
@@ -29,6 +35,11 @@
 // - Code cleanup
 // 0.7.0
 // - Added block channels feature (currently hardcoded)
+// 0.7.1
+// - Fixed YouTube HTML Policy breaking the script
+// 0.8.0
+// - Fixed tags not updating when video changes (need to fix it checking the video too often)
+// ==/Changelog==
 
 //=========================================================================================//
 
@@ -53,6 +64,10 @@ function loadMaterialFonts() {
     }
 }
 
+var escapeHTMLPolicy = trustedTypes.createPolicy("forceInner", {
+    createHTML: (to_escape) => to_escape
+})
+
 var debug = false;
 
 loadMaterialFonts();
@@ -69,7 +84,7 @@ setInterval(function () {
 
     loadMaterialFonts();
     if (window.location.href.includes("youtube.com/shorts/")) {
-        shortsVolumeControl();          // add volume control to shorts
+        // shortsVolumeControl();          // add volume control to shorts
         shortsOpenAsVideo();            // add button to open shorts as video
         shortsDownload();               // add button to download shorts
     }
@@ -133,13 +148,13 @@ function addNewShortsButton(id, label, icon, onclick, iconType = "material-icons
     var button = document.createElement("button");
     button.classList.add(iconType, "style-scope", "ytd-reel-player-overlay-renderer" + v2 ? "-v2" : "");
 
-    button.innerHTML = icon;
+    button.innerHTML = escapeHTMLPolicy.createHTML(icon);
 
     buttonHolder.onclick = onclick;
 
     var buttonLabel = document.createElement("span");
     buttonLabel.classList.add("label", "style-scope", "ytd-reel-player-overlay-renderer" + v2 ? "-v2" : "");
-    buttonLabel.innerHTML = label;
+    buttonLabel.innerHTML = escapeHTMLPolicy.createHTML(label);
 
     // add button to container
     buttonHolder.appendChild(button);
@@ -443,7 +458,7 @@ function spawnButton(inner, id, styletext, parent) {
     var spawned = parent.appendChild(btn);
     var spawned_txt = spawned.appendChild(btn_txt);
     spawned.id = id;
-    spawned_txt.innerHTML = inner;
+    spawned_txt.innerHTML = escapeHTMLPolicy.createHTML(inner);
     spawned_txt.className = "material-icons-outlined";
     spawned.onclick = function () {
         surroundSelectedText(styletext);
@@ -559,7 +574,7 @@ function playlistDuration() {
         if (videoLoadedTotal != videoCountTotal)
             tipContent += `<br>Scroll down to load more videos.`
 
-        tooltip.innerHTML = tipContent;
+        tooltip.innerHTML = escapeHTMLPolicy.createHTML(tipContent);
 
         // durationDisplay.innerText = "Total Duration:"
         durationText.innerText = `${hours}h ${minutes}m ${seconds}s`;
@@ -654,7 +669,7 @@ function videoDownloadButton() {
     newButton.classList.add("material-icons");
     newButton.title = "Download video";
     // add a download icon from Material Icons
-    newButton.innerHTML = 'download';
+    newButton.innerHTML = escapeHTMLPolicy.createHTML("download");
 
     // add the button to the container
     newElement.appendChild(newButton);
@@ -701,45 +716,49 @@ function videoDownloadButton() {
     addStyle("bane-video-download-style", style);
 }
 
-// get video tags and display them
-function displayTags() {
-    // if the tags container already exists, return
-    if (document.getElementById("bane-tags-container")) { return; }
+var currentVideo = null;
 
-    // if (debug) 
-    console.log("Displaying tags");
 
-    // get the og:video:tag meta tags from the head
-    var tags = document.querySelectorAll("meta[property='og:video:tag']");
-    // if there are no tags, return
-    var hasTags = true;
-    if (tags.length == 0) { hasTags = false; }
-
+function createTagContainer(tags) {
     // create a container for the tags in #description-inline-expander
     var description = document.getElementById("description-inline-expander");
-    if (!description) { return; }
-    var container = document.createElement("div");
-    container.id = "bane-tags-container";
-    // append before the last child
-    description.insertBefore(container, description.lastChild);
 
-    // create a header for the tags
-    var header = document.createElement("h3");
-    header.innerText = hasTags ? "Tags" : "This video has no tags";
-    // append the header to the container
-    container.appendChild(header);
+    var tagContainer = null;
+    var tagFlex = null;
 
-    if (hasTags) {
+    // if the container already exists, use it
+    if (document.getElementById("bane-tags-container")) {
+        tagContainer = document.getElementById("bane-tags-container");
+        tagFlex = document.getElementById("bane-tags");
+    }
+    // otherwise, create a new container
+    else {
+        tagContainer = document.createElement("div");
+        tagContainer.id = "bane-tags-container";
+        // append before the last child
+        description.insertBefore(tagContainer, description.lastChild);
+
+        // create a header for the tags
+        var header = document.createElement("h3");
+        header.innerText = "Tags";
+        // append the header to the container
+        tagContainer.appendChild(header);
+
         // create a flexbox for the tags
-        var flexbox = document.createElement("div");
-        flexbox.id = "bane-tags";
+        tagFlex = document.createElement("div");
+        tagFlex.id = "bane-tags";
         // append the flexbox to the container
-        container.appendChild(flexbox);
+        tagContainer.appendChild(tagFlex);
+    }
 
+    // clear the flexbox
+    tagFlex.innerHTML = "";
+
+    if (tags.length > 0) {
         // for each tag, make a link
         for (var i = 0; i < tags.length; i++) {
             // get the tag
-            var tag = tags[i].getAttribute("content");
+            var tag = tags[i];
             // create a link
             var link = document.createElement("a");
             link.href = `https://www.youtube.com/results?search_query=${tag}`;
@@ -747,9 +766,38 @@ function displayTags() {
             link.target = "_blank";
             link.classList.add("bane-tag");
             // append the link to the flexbox
-            flexbox.appendChild(link);
+            tagFlex.appendChild(link);
         }
     }
+    else {
+        // create a paragraph that says the video has no tags
+        var noTags = document.createElement("p");
+        noTags.innerText = "This video has no tags";
+        // append the paragraph to the container
+        tagFlex.appendChild(noTags);
+    }
+}
+
+// get video tags and display them
+function displayTags(force = false) {
+
+    if (currentVideo != document.location.href) {
+        console.log("Video changed, clearing tags");
+    }
+    else
+    {
+        if (document.getElementById("bane-tags-container") && !force) { return; }
+    }
+    
+    currentVideo = document.location.href;
+
+    // if (debug) 
+    console.log("Displaying tags");
+
+    // get the video tags
+    getTags(currentVideo).then((tags) => {
+        createTagContainer(tags);
+    });
 
     // add style
     let style = `
@@ -820,7 +868,7 @@ function addBlockChannelButton(video, channelUrl) {
     let button = document.createElement("button");
     button.id = "bane-block-channel-button";
     button.classList.add("bane-block-button");
-    button.innerHTML = `<span class="material-icons-outlined">block</span>`;
+    button.innerHTML = escapeHTMLPolicy.createHTML(`<span class="material-icons-outlined">block</span>`);
 
     button.title = "Block this channel";
 
@@ -937,6 +985,56 @@ function middleClickThumbnails() {
 
 //=========================================================================================//
 
+//#region Testing
+
+async function getTags(url) {
+    function loadPage(url) {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.timeout = 10000; // Set timeout to 10 seconds (10000 milliseconds)
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    let parser = new DOMParser();
+                    let doc = parser.parseFromString(xhr.responseText, "text/html");
+
+                    let tagElements = doc.querySelectorAll("meta[property='og:video:tag']");
+
+                    let tags = [];
+
+                    if (tagElements.length > 0) {
+                        for (let i = 0; i < tagElements.length; i++) {
+                            tags.push(tagElements[i].getAttribute("content"));
+                        }
+                    }
+
+                    if (tags.length > 0) {
+                        return resolve(tags);
+                    } else {
+                        return resolve([]);
+                    }
+                } else {
+                    reject("Error: " + xhr.status);
+                }
+            };
+            xhr.onerror = function () {
+                reject("Network error");
+            };
+            xhr.ontimeout = function () {
+                reject("Request timed out");
+            };
+            xhr.send();
+        });
+    }
+
+    return loadPage(url);
+}
+
+
+
+
+//=========================================================================================//
+
 //#region Support Functions
 // ===================
 // ===== Support ===============
@@ -963,7 +1061,7 @@ function addStyle(id, css) {
         if (debug) console.log(`Creating style ${id}`);
         let styleEl = document.createElement("style");
         styleEl.id = id;
-        styleEl.innerHTML = css;
+        styleEl.innerHTML = escapeHTMLPolicy.createHTML(css);
         document.head.appendChild(styleEl);
     }
 }
