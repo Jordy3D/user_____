@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotopeaTweaks
 // @namespace    Bane
-// @version      0.1.5
+// @version      0.1.6
 // @description  Tweaks to Photopea.
 // @author       Bane
 // @match        https://www.photopea.com/*
@@ -38,6 +38,7 @@
 //          - Modified the sanitation check for the ID to remove the colon, since it was removed in the UI
 // 0.1.5    - Implemented a way to find the correct input IDs dynamically (hopefully)
 //              - This should fix the issue of the input IDs changing between new versions and new projects within a session
+// 0.1.6    - Add Boox readers size templates (feel free to submit or suggest more!)
 //
 // ==/ChangeLog==
 
@@ -104,6 +105,22 @@ var sizeTemplates = [
             { name: 'Background', width: 1920, height: 1080, unit: 'px' },
             { name: 'ClearART', width: 1000, height: 562, unit: 'px', background: 'transparent' },
             { name: 'Character Art', width: 512, height: 512, unit: 'px' },
+        ]
+    },
+    {
+        label: 'Boox Readers',
+        sizes: [
+            { name: 'Palma 2', width: 824, height: 1648, unit: 'px' },
+            { name: 'Palma', width: 824, height: 1648, unit: 'px' },
+            { name: 'Note Air 4 C', width: 2480, height: 1860, unit: 'px' },
+            { name: 'Go Color 7', width: 1264, height: 1680, unit: 'px' },
+            { name: 'Go 10.3', width: 2480, height: 1860, unit: 'px' },
+            { name: 'Go 6', width: 1072, height: 1448, unit: 'px' },
+            { name: 'Tab Mini C', width: 1872, height: 1404, unit: 'px' },
+            { name: 'Tab Ultra C Pro', width: 2480, height: 1860, unit: 'px' },
+            { name: 'Tab X', width: 1650, height: 2200, unit: 'px' },
+            { name: 'Page', width: 1264, height: 1680, unit: 'px' },
+            { name: 'Note Air 2 Plus', width: 1872, height: 1404, unit: 'px' },
         ]
     }
 ];
