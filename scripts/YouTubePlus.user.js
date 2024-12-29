@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         YouTube Plus
 // @namespace    Bane
-// @version      0.8.0
+// @version      0.9.0
 // @description  Adds features to YouTube
 // @author       Bane
 // @match        https://www.youtube.com/*
+// @match        https://www.cnvmp3.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // @grant        none
 // ==/UserScript==
@@ -39,6 +40,8 @@
 // - Fixed YouTube HTML Policy breaking the script
 // 0.8.0
 // - Fixed tags not updating when video changes (need to fix it checking the video too often)
+// 0.9.0
+// - Replaced ssyoutube with cnvmp3
 // ==/Changelog==
 
 //=========================================================================================//
@@ -70,6 +73,9 @@ var escapeHTMLPolicy = trustedTypes.createPolicy("forceInner", {
 
 var debug = false;
 
+
+const videoDownloadBaseURL = "https://www.cnvmp3.com/?video=";
+
 loadMaterialFonts();
 //#endregion
 
@@ -78,33 +84,46 @@ loadMaterialFonts();
 // ===== Update and Check ===============
 // ================================================
 
-setInterval(function () {
-    // These are on a loop because YouTube pages don't load all at once
-    // Also, it should largely be fine because the functions check if they've already done their thing
+var host = window.location.host;
 
-    loadMaterialFonts();
-    if (window.location.href.includes("youtube.com/shorts/")) {
-        // shortsVolumeControl();          // add volume control to shorts
-        shortsOpenAsVideo();            // add button to open shorts as video
-        shortsDownload();               // add button to download shorts
-    }
-    if (window.location.href.includes("youtube.com/playlist")) {
-        // playlistDuration();             // display playlist duration
-    }
-    if (window.location.href.includes("youtube.com/watch")) {
-        videoDownloadButton();          // add button to download video
-        displayTags();                  // add tags to video description
-    }
 
-    removePP();                         // remove &pp=XXX from all URLs
-    middleClickThumbnails();            // make thumbnails middle-clickable
+// check if the current host is YouTube
+if (host == "www.youtube.com") {
+    setInterval(function () {
+        // These are on a loop because YouTube pages don't load all at once
+        // Also, it should largely be fine because the functions check if they've already done their thing
 
-    // Block Channels
-    blockChannels();                    // block channels
-}, 1000);
+        loadMaterialFonts();
+        if (window.location.href.includes("youtube.com/shorts/")) {
+            // shortsVolumeControl();          // add volume control to shorts
+            shortsOpenAsVideo();            // add button to open shorts as video
+            shortsDownload();               // add button to download shorts
+        }
+        if (window.location.href.includes("youtube.com/playlist")) {
+            // playlistDuration();             // display playlist duration
+        }
+        if (window.location.href.includes("youtube.com/watch")) {
+            videoDownloadButton();          // add button to download video
+            displayTags();                  // add tags to video description
+        }
+
+        removePP();                         // remove &pp=XXX from all URLs
+        middleClickThumbnails();            // make thumbnails middle-clickable
+
+        // Block Channels
+        blockChannels();                    // block channels
+    }, 1000);
+}
+
+// check if the current host is cnvmp3
+if (host == "www.cnvmp3.com") {
+    addLinkToInput();                   // add the link added to the url to the input
+}
 //#endregion
 
 //=========================================================================================//
+
+//#region YouTube
 
 //#region Shorts
 // ============================
@@ -233,9 +252,11 @@ function shortsOpenAsVideo() {
 function shortsDownload() {
     var downloadShort = function () {
         // get the URL
-        var url = window.location.href;
-        // replace youtube.com with ssyoutube.com
-        url = url.replace("youtube.com", "ssyoutube.com");
+        var currentURL = window.location.href;
+
+        // Append the current URL to the base URL
+        var url = videoDownloadBaseURL + currentURL;
+
         // open the URL in a new tab
         window.open(url, "_blank");
     }
@@ -680,9 +701,9 @@ function videoDownloadButton() {
     // add an event listener to the button
     newButton.addEventListener("click", function () {
         // get the URL
-        var url = window.location.href;
-        // replace youtube.com with ssyoutube.com
-        url = url.replace("youtube.com", "ssyoutube.com");
+        var currentURL = window.location.href;
+        // append the current URL to the base URL
+        var url = videoDownloadBaseURL + currentURL;
         // open the URL in a new tab
         window.open(url, "_blank");
     });
@@ -784,11 +805,10 @@ function displayTags(force = false) {
     if (currentVideo != document.location.href) {
         console.log("Video changed, clearing tags");
     }
-    else
-    {
+    else {
         if (document.getElementById("bane-tags-container") && !force) { return; }
     }
-    
+
     currentVideo = document.location.href;
 
     // if (debug) 
@@ -981,6 +1001,25 @@ function middleClickThumbnails() {
     addStyle("bane-middle-click-style", style);
 
 }
+//#endregion
+
+//#endregion
+
+//=========================================================================================//
+
+//#region cnvmp3
+
+function addLinkToInput() {
+    var url = window.location.href;
+    var input = document.getElementById("video-url");
+    if (!input) return;
+
+    // get the ?video= part of the URL
+    var video = url.split("?video=")[1];
+    // set the value of the input to the video
+    input.value = video;
+}
+
 //#endregion
 
 //=========================================================================================//
