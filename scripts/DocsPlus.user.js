@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Docs Plus
 // @namespace    Bane
-// @version      0.0.2
+// @version      0.0.3
 // @description  Add buttons and the like to Docs
 // @author       Bane
 // @match        https://docs.google.com/document/d/*/edit*
@@ -19,6 +19,7 @@
 // 0.0.1    - Initial version
 //              - Added toggle to display standard document outline or a the document tabs
 // 0.0.2    - Fixed it to work with multiple tabs rather than just the first one
+// 0.0.3    - Re-add HTML policy escaping because I KNEW I WAS GOING TO NEED IT AND IT TRICKED ME
 // ==/ChangeLog==
 
 // keep trying to create the buttons every 100ms until successful
@@ -228,6 +229,10 @@ function addCustomCSS() {
 
 //#region Support Functions
 
+var escapeHTMLPolicy = trustedTypes.createPolicy("forceInner", {
+    createHTML: (to_escape) => to_escape
+});
+
 function addStyle(id, css, debug = false) {
     // id is the id of the style element
     // css is the style content
@@ -235,7 +240,7 @@ function addStyle(id, css, debug = false) {
         if (debug) console.log(`Creating style ${id}`);
         let styleEl = document.createElement("style");
         styleEl.id = id;
-        styleEl.innerHTML = css;
+        styleEl.innerHTML = escapeHTMLPolicy.createHTML(css);
         document.head.appendChild(styleEl);
     }
 }
