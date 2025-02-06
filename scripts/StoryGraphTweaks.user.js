@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         StoryGraph Tweaks
 // @namespace    Bane
-// @version      0.0.4
+// @version      0.0.5
 // @description  Tweaks and changes to The StoryGraph
 // @author       Bane
 // @match        https://app.thestorygraph.com/*
@@ -16,11 +16,7 @@
 // ==/Tags==
 
 // TODO:
-// - Add a button to copy book ID (done)
-// - Add a button to edit book (done)
-// - Add a button to mark as read today 
-// - Add a button to copy author ID (done)
-// - Add a button to copy series ID (done)
+// - Add a button to mark as read today (automatically sets the start and finish date to today) 
 
 // ==ChangeLog==
 // 0.0.1    - Initial version
@@ -28,6 +24,7 @@
 // 0.0.2    - Added loop to check for new book result divs (on both infinite scroll and page load)
 // 0.0.3    - Code cleanup and refactoring
 // 0.0.4    - Added buttons to copy author and series IDs
+// 0.0.5    - Added support for light and dark mode (previously just dark mode)
 // ==/ChangeLog==
 
 //=====================================================================================================//
@@ -135,9 +132,16 @@ function addCustomCSS() {
 
     var customCSS = `
         :root {
-            --darkGrey: rgb(229 229 229);
-            --darkerGrey: rgb(102 102 102);
-            --darkestGrey: rgb(51 51 51);
+            --background-1: rgb(255 255 255);
+            --background-2: rgb(245 245 245);
+            --background-3: rgb(235 235 235);
+            --highlight: rgb(56 190 201);
+        }
+
+        html.dark:root {
+            --background-1: rgb(229 229 229);
+            --background-3: rgb(102 102 102);
+            --background-2: rgb(51 51 51);
             --highlight: rgb(56 190 201);
         }
 
@@ -145,16 +149,16 @@ function addCustomCSS() {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 2px;
-            background-color: var(--darkerGrey);
+            background-color: var(--background-3);
             margin-top: 10px;
-            border: 2px solid var(--darkerGrey);
+            border: 2px solid var(--background-3);
         }
 
         .bane-action-button {
             cursor: pointer;
             font-size: 0.75rem;
             line-height: 1rem;
-            background-color: var(--darkestGrey);
+            background-color: var(--background-2);
             text-align: center;
             padding: 4px 8px;
         }
@@ -164,7 +168,7 @@ function addCustomCSS() {
         }
 
         .bane-action-button:hover {
-            background-color: var(--darkerGrey);
+            background-color: var(--background-3);
         }
 
         [bane-author-tweaks],
@@ -189,7 +193,7 @@ function addCustomCSS() {
             gap: 8px;
 
             padding: 10px;
-            border-left: 1px solid var(--darkerGrey);
+            border-left: 1px solid var(--background-3);
         }
 
         .bane-header-button {
@@ -197,7 +201,7 @@ function addCustomCSS() {
             font-size: .75rem;
             font-weight: 500;
             line-height: 1rem;
-            background-color: var(--darkerGrey);
+            background-color: var(--background-3);
 
             border-color: transparent;
             border-radius: .5rem;
@@ -208,7 +212,7 @@ function addCustomCSS() {
 
             &:hover {
                 background-color: var(--highlight);
-                color: var(--darkestGrey);
+                color: var(--background-2);
             }
         }
     `;
