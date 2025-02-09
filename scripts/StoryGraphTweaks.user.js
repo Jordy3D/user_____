@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         StoryGraph Tweaks
 // @namespace    Bane
-// @version      0.0.5
+// @version      0.5.1
 // @description  Tweaks and changes to The StoryGraph
 // @author       Bane
 // @match        https://app.thestorygraph.com/*
@@ -19,12 +19,13 @@
 // - Add a button to mark as read today (automatically sets the start and finish date to today) 
 
 // ==ChangeLog==
-// 0.0.1    - Initial version
+// 0.1.0    - Initial version
 //              - Added buttons to copy book ID and jump to edit page
-// 0.0.2    - Added loop to check for new book result divs (on both infinite scroll and page load)
-// 0.0.3    - Code cleanup and refactoring
-// 0.0.4    - Added buttons to copy author and series IDs
-// 0.0.5    - Added support for light and dark mode (previously just dark mode)
+// 0.2.0    - Added loop to check for new book result divs (on both infinite scroll and page load)
+// 0.3.0    - Code cleanup and refactoring
+// 0.4.0    - Added buttons to copy author and series IDs
+// 0.5.0    - Added support for light and dark mode (previously just dark mode)
+// 0.5.1    - Tweaked the CSS a little to improve button positioning in the author and series headers
 // ==/ChangeLog==
 
 //=====================================================================================================//
@@ -180,10 +181,16 @@ function addCustomCSS() {
 
             > :first-child {
                 flex: 1;
+                padding: 10px 0;
+                align-items: flex-start;
             }
 
             .secondary-btn {
                 margin-top: 0;
+            }
+
+            .section-heading + p {
+                margin-bottom: 0;
             }
         }
 
